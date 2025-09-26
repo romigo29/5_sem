@@ -1,0 +1,3 @@
+﻿  HT.cpp
+D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_HTAPI\HT.cpp(395,1): warning C4172: возвращаемый адрес локальной переменной или временного : buffer
+  OS10_HTAPI.vcxproj -> D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\x64\Debug\OS10_HTAPI.lib
