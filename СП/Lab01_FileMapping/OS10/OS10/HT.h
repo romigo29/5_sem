@@ -76,14 +76,14 @@ namespace HT    // HT API
 
 	BOOL Insert      // добавить элемент в хранилище
 	(
-		const HTHANDLE* hthandle,            // управление HT
+		HTHANDLE* hthandle,            // управление HT
 		const Element* element              // элемент
 	);	//  == TRUE успешное завершение 
 
 
 	BOOL Delete      // удалить элемент в хранилище
 	(
-		const HTHANDLE* hthandle,            // управление HT (ключ)
+		HTHANDLE* hthandle,            // управление HT (ключ)
 		const Element* element              // элемент 
 	);	//  == TRUE успешное завершение 
 
@@ -96,7 +96,7 @@ namespace HT    // HT API
 
 	BOOL Update     //  именить элемент в хранилище
 	(
-		const HTHANDLE* hthandle,           // управление HT
+		HTHANDLE* hthandle,           // управление HT
 		const Element* oldelement,          // старый элемент (ключ, размер ключа)
 		const void* newpayload,				// новые данные  
 		int   newpayloadlength				// размер новых данных

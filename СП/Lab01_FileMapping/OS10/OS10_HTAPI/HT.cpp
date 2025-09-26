@@ -234,44 +234,42 @@ namespace HT
         return -1; // таблица заполнена
     }
 
-    BOOL Insert(const HTHANDLE* hthandle, const Element* element) {
-        if (hthandle == nullptr || element == nullptr || element->key == nullptr) {
+    BOOL Insert(HTHANDLE* hthandle, const Element* element) {
+        if (!hthandle || !element || !element->key || element->keylength <= 0) {
+            std::cerr << "Insert: неверные параметры" << std::endl;
             return FALSE;
         }
 
-        Element* table = reinterpret_cast<Element*>(
-            static_cast<char*>(hthandle->Addr) + sizeof(HTHANDLE));
+        char* dataStart = static_cast<char*>(hthandle->Addr) + sizeof(HTHANDLE);
+        size_t elementBlockSize = sizeof(Element) + hthandle->MaxKeyLength + hthandle->MaxPayloadLength;
+        Element* table = reinterpret_cast<Element*>(dataStart);
 
         bool found = false;
         int slotIndex = FindSlot(hthandle, element->key, element->keylength, found);
 
         if (found) {
-            strncpy_s(const_cast<HTHANDLE*>(hthandle)->LastErrorMessage,
-                "Ключ уже существует", SIZE);
+            cout << "Insert: ключ уже существует" << std::endl;
             return FALSE;
         }
-
         if (slotIndex == -1) {
-            strncpy_s(const_cast<HTHANDLE*>(hthandle)->LastErrorMessage,
-                "Хранилище переполнено", SIZE);
+            cout << "Insert: хранилище переполнено" << std::endl;
             return FALSE;
         }
 
-        // Вставляем элемент
+        char* elementDataStart = dataStart + slotIndex * elementBlockSize;
         Element* slot = &table[slotIndex];
-        memcpy(slot, element, sizeof(Element));
 
-        void* newKey = malloc(element->keylength);
-        memcpy(newKey, element->key, element->keylength);
-        slot->key = newKey;
+        // Копируем ключ и payload в memory-mapped region
+        slot->key = elementDataStart;
+        memcpy((void*)slot->key, element->key, element->keylength);
+        slot->keylength = element->keylength;
 
+        slot->payload = elementDataStart + hthandle->MaxKeyLength;
         if (element->payload && element->payloadlength > 0) {
-            void* newPayload = malloc(element->payloadlength);
-            memcpy(newPayload, element->payload, element->payloadlength);
-            slot->payload = newPayload;
+            memcpy((void*)slot->payload, element->payload, element->payloadlength);
+            slot->payloadlength = element->payloadlength;
         }
         else {
-            slot->payload = nullptr;
             slot->payloadlength = 0;
         }
 
@@ -284,37 +282,30 @@ namespace HT
         return TRUE;
     }
 
-    BOOL Delete(const HTHANDLE* hthandle, const Element* element) // Удаление элемента
-    {
-        if (hthandle == nullptr || element == nullptr || element->key == nullptr) {
-            return FALSE;
-        }
 
-        Element* table = reinterpret_cast<Element*>(
-            static_cast<char*>(hthandle->Addr) + sizeof(HTHANDLE));
+    BOOL Delete(HTHANDLE* hthandle, const Element* element) {
+        if (!hthandle || !element || !element->key) return FALSE;
+
+        char* dataStart = static_cast<char*>(hthandle->Addr) + sizeof(HTHANDLE);
+        size_t elementBlockSize = sizeof(Element) + hthandle->MaxKeyLength + hthandle->MaxPayloadLength;
+        Element* table = reinterpret_cast<Element*>(dataStart);
 
         bool found = false;
         int slotIndex = FindSlot(hthandle, element->key, element->keylength, found);
-
         if (!found || slotIndex == -1) {
-            strncpy_s(const_cast<HTHANDLE*>(hthandle)->LastErrorMessage,
-                "Ключ не найден", SIZE);
+            std::cerr << "Delete: ключ не найден" << std::endl;
             return FALSE;
         }
 
         Element* slot = &table[slotIndex];
 
-        // Освобождаем память под ключ и payload
-        if (slot->key != nullptr && slot->key != (void*)-1) free((void*)slot->key);
-        if (slot->payload != nullptr) free((void*)slot->payload);
-
-        // Помечаем слот как "удалённый"
-        slot->key = (void*)-1;   // tombstone
+        // Помечаем как tombstone
+        slot->key = (void*)-1;
         slot->keylength = 0;
-        slot->payload = nullptr;
         slot->payloadlength = 0;
+        slot->payload = nullptr;
 
-        // Проверка необходимости создания снимка
+        // Snapshot
         time_t currentTime = time(nullptr);
         if (difftime(currentTime, hthandle->lastsnaptime) >= hthandle->SecSnapshotInterval) {
             Snap(hthandle);
@@ -322,6 +313,7 @@ namespace HT
 
         return TRUE;
     }
+
 
     Element* Get(const HTHANDLE* hthandle, const Element* element) {
         if (hthandle == nullptr || element == nullptr || element->key == nullptr) {
@@ -348,38 +340,27 @@ namespace HT
         return result;
     }
 
-    BOOL Update(const HTHANDLE* hthandle, const Element* oldelement,
-        const void* newpayload, int newpayloadlength) // Обновление элемента
-    {
-        if (hthandle == nullptr || oldelement == nullptr || newpayload == nullptr) {
-            return FALSE;
-        }
+    BOOL Update(HTHANDLE* hthandle, const Element* oldelement, const void* newpayload, int newpayloadlength) {
+        if (!hthandle || !oldelement || !newpayload || newpayloadlength <= 0) return FALSE;
 
-        Element* table = reinterpret_cast<Element*>(
-            static_cast<char*>(hthandle->Addr) + sizeof(HTHANDLE));
+        char* dataStart = static_cast<char*>(hthandle->Addr) + sizeof(HTHANDLE);
+        size_t elementBlockSize = sizeof(Element) + hthandle->MaxKeyLength + hthandle->MaxPayloadLength;
+        Element* table = reinterpret_cast<Element*>(dataStart);
 
         bool found = false;
         int slotIndex = FindSlot(hthandle, oldelement->key, oldelement->keylength, found);
-
         if (!found || slotIndex == -1) {
-            strncpy_s(const_cast<HTHANDLE*>(hthandle)->LastErrorMessage,
-                "Ключ не найден", SIZE);
+            std::cerr << "Update: ключ не найден" << std::endl;
             return FALSE;
         }
 
         Element* slot = &table[slotIndex];
 
-        // Освобождаем старый payload
-        if (slot->payload != nullptr) free((void*)slot->payload);
-
-        // Выделяем новый payload
-        void* newPayloadCopy = malloc(newpayloadlength);
-        memcpy(newPayloadCopy, newpayload, newpayloadlength);
-
-        slot->payload = newPayloadCopy;
+        // Копируем новый payload в memory-mapped region
+        memcpy((void*)slot->payload, newpayload, newpayloadlength);
         slot->payloadlength = newpayloadlength;
 
-        // Проверка необходимости создания снимка
+        // Snapshot
         time_t currentTime = time(nullptr);
         if (difftime(currentTime, hthandle->lastsnaptime) >= hthandle->SecSnapshotInterval) {
             Snap(hthandle);

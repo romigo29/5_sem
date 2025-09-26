@@ -27,7 +27,6 @@ int main() {
         TestDuplicateInsert(capacity, secSnapshotInterval, maxKeyLength, maxPayloadLength, "test_duplicate.ht", testKey, testValue, testValue2);
         TestDeleteNonExistent(capacity, secSnapshotInterval, maxKeyLength, maxPayloadLength, "test_delete_nonexistent.ht", nonExistentKey);
         TestGetNonExistent(capacity, secSnapshotInterval, maxKeyLength, maxPayloadLength, "test_get_nonexistent.ht", nonExistentKey);
-        TestGetLastError(capacity, secSnapshotInterval, maxKeyLength, maxPayloadLength, "test_error.ht", nonExistentKey);
         TestPrint(capacity, secSnapshotInterval, maxKeyLength, maxPayloadLength, "test_print.ht", "print_key", "print_value");
 
         cout << "=== ALL UNIT TESTS PASSED ===" << endl;

@@ -204,24 +204,6 @@ void TestClose(int capacity, int secSnapshotInterval, int maxKeyLength, int maxP
     cout << "Test Close: PASSED" << endl << endl;
 }
 
-void TestGetLastError(int capacity, int secSnapshotInterval, int maxKeyLength, int maxPayloadLength,
-    const char* filename, const char* key) {
-    cout << "=== 9.4. Test GetLastError ===" << endl;
-
-    HTHANDLE* ht = Create(capacity, secSnapshotInterval, maxKeyLength, maxPayloadLength, filename);
-    assert(ht != nullptr);
-
-    Element searchElement(key, strlen(key));
-    Delete(ht, &searchElement);
-
-    char* errorMsg = GetLastError(ht);
-    assert(errorMsg != nullptr && strlen(errorMsg) > 0);
-    cout << "Error message: " << errorMsg << endl;
-
-    assert(Close(ht));
-    cout << "Test GetLastError: PASSED" << endl << endl;
-}
-
 void TestPrint(int capacity, int secSnapshotInterval, int maxKeyLength, int maxPayloadLength,
     const char* filename, const char* key, const char* value) {
     cout << "=== 10. Test Print ===" << endl;

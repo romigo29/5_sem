@@ -61,14 +61,14 @@ namespace HT
 
 	BOOL Insert          
 	(
-		const HTHANDLE* hthandle,              
+		HTHANDLE* hthandle,              
 		const Element* element               
 	);	      
 
 
 	BOOL Delete          
 	(
-		const HTHANDLE* hthandle,               
+		HTHANDLE* hthandle,               
 		const Element* element                
 	);	      
 
@@ -81,7 +81,7 @@ namespace HT
 
 	BOOL Update          
 	(
-		const HTHANDLE* hthandle,             
+		HTHANDLE* hthandle,             
 		const Element* oldelement,               
 		const void* newpayload,				    
 		int   newpayloadlength				   
