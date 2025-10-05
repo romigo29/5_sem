@@ -1,145 +1,181 @@
-#include "Winsock2.h" // заголовок WS2_32.dll
-#include <Windows.h>
 #include <iostream>
 #include <string>
-#include <TCHAR.h>
+#include <cstring>
+#include <ctime>
+
+#include <winsock2.h> 
+#include <windows.h>
+
+#pragma comment(lib, "WS2_32.lib")
+#pragma warning(disable:4996)
+
 using namespace std;
-#pragma comment(lib, "WS2_32.lib") // экспорт WS2_32.dll
-#pragma warning (disable: 4996)
 
-#define PORT 2000
-
-string GetErrorMsgText(int code) // cформировать текст ошибки
+string GetErrorMsgText(int code)
 {
     string msgText;
-    switch (code)                      // проверка кода возврата  
+    switch (code)
     {
-    case WSAEINTR: msgText = "Работа функции прервана "; break;
+    case WSAEINTR: msgText = "Работа функции прервана"; break;
     case WSAEACCES: msgText = "Разрешение отвергнуто"; break;
     case WSAEFAULT: msgText = "Ошибочный адрес"; break;
-    case WSAEINVAL: msgText = "Ошибка в аргументе "; break;
-    case WSAEMFILE: msgText = "Слишком много файлов открыто"; break;
+    case WSAEINVAL: msgText = "Ошибка в аргументе"; break;
+    case WSAEMFILE: msgText = "Открыто слишком много файлов"; break;
     case WSAEWOULDBLOCK: msgText = "Ресурс временно недоступен"; break;
-    case WSAEINPROGRESS: msgText = "Операция в процессе развития"; break;
-    case WSAEALREADY: msgText = "Операция уже выполняется "; break;
-    case WSAENOTSOCK: msgText = "Сокет задан неправильно   "; break;
-    case WSAEDESTADDRREQ: msgText = "Требуется адрес расположения "; break;
-    case WSAEMSGSIZE: msgText = "Сообщение слишком длинное "; break;
-    case WSAEPROTOTYPE: msgText = "Неправильный тип протокола для сокета "; break;
+    case WSAEINPROGRESS: msgText = "Операция в процессе"; break;
+    case WSAEALREADY: msgText = "Операция уже выполняется"; break;
+    case WSAENOTSOCK: msgText = "Сокет задан неправильно"; break;
+    case WSAEDESTADDRREQ: msgText = "Требуется адрес расположения"; break;
+    case WSAEMSGSIZE: msgText = "Сообщение слишком длинное"; break;
+    case WSAEPROTOTYPE: msgText = "Неправильный тип протокола для сокета"; break;
     case WSAENOPROTOOPT: msgText = "Ошибка в опции протокола"; break;
-    case WSAEPROTONOSUPPORT: msgText = "Протокол не поддерживается "; break;
-    case WSAESOCKTNOSUPPORT: msgText = "Тип сокета не поддерживается "; break;
-    case WSAEOPNOTSUPP: msgText = "Операция не поддерживается "; break;
-    case WSAEPFNOSUPPORT: msgText = "Тип протоколов не поддерживается "; break;
+    case WSAEPROTONOSUPPORT: msgText = "Протокол не поддерживается"; break;
+    case WSAESOCKTNOSUPPORT: msgText = "Тип сокета не поддерживается"; break;
+    case WSAEOPNOTSUPP: msgText = "Операция не поддерживается"; break;
+    case WSAEPFNOSUPPORT: msgText = "Тип протоколов не поддерживается"; break;
     case WSAEAFNOSUPPORT: msgText = "Тип адресов не поддерживается протоколом"; break;
-    case WSAEADDRINUSE: msgText = "Адрес уже используется "; break;
+    case WSAEADDRINUSE: msgText = "Адрес уже используется"; break;
     case WSAEADDRNOTAVAIL: msgText = "Запрошенный адрес не может быть использован"; break;
-    case WSAENETDOWN: msgText = "Сеть отключена "; break;
+    case WSAENETDOWN: msgText = "Сеть отключена"; break;
     case WSAENETUNREACH: msgText = "Сеть не достижима"; break;
     case WSAENETRESET: msgText = "Сеть разорвала соединение"; break;
-    case WSAECONNABORTED: msgText = "Программный отказ связи "; break;
-    case WSAECONNRESET: msgText = "Связь восстановлена "; break;
+    case WSAECONNABORTED: msgText = "Программный отказ связи"; break;
+    case WSAECONNRESET: msgText = "Связь не восстановлена"; break;
     case WSAENOBUFS: msgText = "Не хватает памяти для буферов"; break;
     case WSAEISCONN: msgText = "Сокет уже подключен"; break;
     case WSAENOTCONN: msgText = "Сокет не подключен"; break;
     case WSAESHUTDOWN: msgText = "Нельзя выполнить send: сокет завершил работу"; break;
-    case WSAETIMEDOUT: msgText = "Закончился отведенный интервал  времени"; break;
-    case WSAECONNREFUSED: msgText = "Соединение отклонено  "; break;
+    case WSAETIMEDOUT: msgText = "Закончился отведенный интервал времени"; break;
+    case WSAECONNREFUSED: msgText = "Соединение отклонено"; break;
     case WSAEHOSTDOWN: msgText = "Хост в неработоспособном состоянии"; break;
-    case WSAEHOSTUNREACH: msgText = "Нет маршрута для хоста "; break;
-    case WSAEPROCLIM: msgText = "Слишком много процессов "; break;
-    case WSASYSNOTREADY: msgText = "Сеть не доступна "; break;
-    case WSAVERNOTSUPPORTED: msgText = "Данная версия недоступна "; break;
-    case WSANOTINITIALISED: msgText = "Не выполнена инициализация WS2_32.DLL"; break;
+    case WSAEHOSTUNREACH: msgText = "Нет маршрута для хоста"; break;
+    case WSAEPROCLIM: msgText = "Слишком много процессов"; break;
+    case WSASYSNOTREADY: msgText = "Сеть не доступна"; break;
+    case WSAVERNOTSUPPORTED: msgText = "Данная версия недоступна"; break;
+    case WSANOTINITIALISED: msgText = "Не выполнена инициализация WS2_32.dll"; break;
     case WSAEDISCON: msgText = "Выполняется отключение"; break;
-    case WSATYPE_NOT_FOUND: msgText = "Класс не найден "; break;
+    case WSATYPE_NOT_FOUND: msgText = "Класс не найден"; break;
     case WSAHOST_NOT_FOUND: msgText = "Хост не найден"; break;
-    case WSATRY_AGAIN: msgText = "Неавторизированный хост не найден "; break;
-    case WSANO_RECOVERY: msgText = "Неопределенная  ошибка "; break;
-    case WSANO_DATA: msgText = "Нет записи запрошенного типа "; break;
-    case WSA_INVALID_HANDLE: msgText = "Указанный дескриптор события  с ошибкой   "; break;
-    case WSA_INVALID_PARAMETER: msgText = "Один или более параметров с ошибкой   "; break;
-    case WSA_IO_INCOMPLETE: msgText = "Объект ввода-вывода не в сигнальном состоянии"; break;
-    case WSA_IO_PENDING: msgText = "Операция завершится позже  "; break;
-    case WSA_NOT_ENOUGH_MEMORY: msgText = "Не достаточно памяти "; break;
-    case WSA_OPERATION_ABORTED: msgText = "Операция отвергнута "; break;
-    case WSASYSCALLFAILURE: msgText = "Аварийное завершение системного вызова "; break;
-    default:                msgText = "***ERROR***";      break;
-    };
+    case WSATRY_AGAIN: msgText = "Неавторизованный хост не найден"; break;
+    case WSANO_RECOVERY: msgText = "Неопределенная ошибка"; break;
+    case WSANO_DATA: msgText = "Нет записи запрошенного типа"; break;
+    case WSASYSCALLFAILURE: msgText = "Аварийное завершение системного вызова"; break;
+    default: msgText = "Unknown error"; break;
+    }
     return msgText;
-};
+}
 
-string SetErrorMsgText(string msgText, int code)
+string SetErrorMsgText(const string& msgText, int code)
 {
-	return msgText + GetErrorMsgText(code);
-};
+    return msgText + " : " + GetErrorMsgText(code) + " (" + to_string(code) + ")";
+}
 
-int main(int argc, _TCHAR* argv[])
+int main()
 {
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
 
-    setlocale(LC_ALL, "RUS");
-    WSADATA wsaData;
-    //............................................................
+    SOCKET listenSocket = INVALID_SOCKET;
+
     try
-    { 
-        while (true) 
-        {
-            if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-                throw SetErrorMsgText("Startup:", WSAGetLastError());
-            //............................................................
-            SOCKET sS; //сетевой сокет
-            if ((sS = socket(AF_INET, SOCK_STREAM, NULL)) == INVALID_SOCKET)
-                throw SetErrorMsgText("socket:", WSAGetLastError());
-
-            SOCKADDR_IN serv; // параметры сокета sS
-            serv.sin_family = AF_INET; // используется IP-адресация 
-            serv.sin_port = htons(PORT); // порт 2000
-            serv.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-            if (bind(sS, (LPSOCKADDR)&serv, sizeof(serv)) == SOCKET_ERROR) // установка параметров сокета
-                throw SetErrorMsgText("bind:", WSAGetLastError());
-            if (listen(sS, SOMAXCONN) == SOCKET_ERROR) //режим прослушивания
-                throw SetErrorMsgText("listen:", WSAGetLastError());
-
-            SOCKET cS; // сокет для обмена данными с клиентом
-            SOCKADDR_IN clnt; // параметры сокета клиента
-            memset(&clnt, 0, sizeof(clnt)); // обнулить память
-            int lclnt = sizeof(clnt); // размер SOCKADDR_IN
-
-            if ((cS = accept(sS, (sockaddr*)&clnt, &lclnt)) == INVALID_SOCKET)
-                throw SetErrorMsgText("accept:", WSAGetLastError());
-
-            cout << "Client connected: IP = " << inet_ntoa(clnt.sin_addr) << ", Port = " << htons(clnt.sin_port) << endl;
-
-            char ibuf[50], //буфер ввода
-                obuf[50] = "sever: принято "; //буфер вывода
-            int libuf = 0, //количество принятых байт
-                lobuf = 0; //количество отправленных байь
-
-            while (true) {
-                if ((libuf = recv(cS, ibuf, sizeof(ibuf), NULL)) == SOCKET_ERROR)
-                    throw SetErrorMsgText("recv:", WSAGetLastError());
-                _itoa(lobuf, obuf + sizeof("sever: принято ") - 1, 10);
-
-                cout << ibuf << endl;
-
-                if ((lobuf = send(cS, obuf, strlen(obuf) + 1, NULL)) == SOCKET_ERROR)
-                    throw SetErrorMsgText("send:", WSAGetLastError());
-            }
-            //.............................................................
-            if (closesocket(sS) == SOCKET_ERROR)
-                throw SetErrorMsgText("closesocket:", WSAGetLastError());
-            if (WSACleanup() == SOCKET_ERROR)
-                throw SetErrorMsgText("Cleanup:", WSAGetLastError());
-
-            cout << "Lost connection" << endl << "Wait for another connection" << endl;
-            system("pause");
+    {
+        WSADATA wsaData;
+        int wsaInitResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+        if (wsaInitResult != 0) {
+            throw SetErrorMsgText("WSAStartup failed", wsaInitResult);
         }
-	}
-	catch (string errorMsgText)
-	{
-		cout << endl << "WSAGetLastError: " << errorMsgText;
-	}
-	//................................................................
-	return 0;
+
+
+        listenSocket = socket(AF_INET, SOCK_STREAM, NULL);
+        if (listenSocket == INVALID_SOCKET) {
+            throw SetErrorMsgText("socket failed", WSAGetLastError());
+        }
+
+        sockaddr_in serverAddr;
+        memset(&serverAddr, 0, sizeof(serverAddr));
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(2000);            
+        serverAddr.sin_addr.s_addr = INADDR_ANY;       
+
+        if (bind(listenSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {        
+            closesocket(listenSocket);
+            listenSocket = INVALID_SOCKET;
+            throw SetErrorMsgText("bind failed", WSAGetLastError());
+        }
+
+        if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {       
+            closesocket(listenSocket);
+            listenSocket = INVALID_SOCKET;
+            throw SetErrorMsgText("listen failed", WSAGetLastError());
+        }
+
+        cout << "Server is listening on port 2000..." << endl;
+
+        while (true)
+        {
+            sockaddr_in clientAddr;
+            int clientAddrLen = sizeof(clientAddr);
+            SOCKET clientSocket = accept(listenSocket, (sockaddr*)&clientAddr, &clientAddrLen);       
+
+            if (clientSocket == INVALID_SOCKET) {
+                throw SetErrorMsgText("accept failed", WSAGetLastError());
+            }
+
+            cout << "Client connected." << endl;
+            cout << "Client IP:   " << inet_ntoa(clientAddr.sin_addr) << endl;
+            cout << "Client Port: " << ntohs(clientAddr.sin_port) << endl;
+
+            clock_t startTime = clock();
+
+            const int BUF_SIZE = 1024;
+            char buffer[BUF_SIZE + 1];
+
+            while (true)
+            {
+                int received = recv(clientSocket, buffer, BUF_SIZE, NULL);       
+                if (received == SOCKET_ERROR)
+                {
+                    cerr << "recv error: " << GetErrorMsgText(WSAGetLastError()) << " (" << WSAGetLastError() << ")" << endl;
+                    break;
+                }
+                if (received == 0)
+                {
+                    cout << "Client closed the connection." << endl;
+                    break;
+                }
+
+                cout << "Received (" << received << " bytes): " << buffer << endl;
+
+                int sent = send(clientSocket, buffer, received, 0);
+                if (sent == SOCKET_ERROR) {
+                    cerr << "send error: " << GetErrorMsgText(WSAGetLastError()) << " (" << WSAGetLastError() << ")" << endl;
+                    break;
+                }
+            }     
+
+            clock_t endTime = clock();
+            double seconds = double(endTime - startTime) / CLOCKS_PER_SEC;
+            cout << "Session duration: " << seconds << " seconds." << endl;
+
+            if (closesocket(clientSocket) == SOCKET_ERROR) {
+                cerr << "closesocket(client) error: " << GetErrorMsgText(WSAGetLastError()) << " (" << WSAGetLastError() << ")" << endl;
+            }
+            cout << "Waiting for next client..." << endl << endl;
+        }    
+    }
+    catch (const string& errMsg)
+    {
+        cerr << "Exception: " << errMsg << endl;
+    }
+
+
+    if (listenSocket != INVALID_SOCKET) {
+        closesocket(listenSocket);
+        listenSocket = INVALID_SOCKET;
+    }
+    WSACleanup();
+
+
+    cout << "Server terminated." << endl;
+    return 0;
 }

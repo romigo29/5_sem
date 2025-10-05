@@ -1,4 +1,5 @@
-﻿  Tests.cpp
+﻿  main.cpp
+  Tests.cpp
 D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(45,52): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
 D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(45,32): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
 D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(61,58): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
@@ -22,6 +23,5 @@ D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(185,32): 
 D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(214,52): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
 D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(214,32): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
 D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\OS10_04\Tests.cpp(217,38): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
-  main.cpp
   Создание кода...
   OS10_04.vcxproj -> D:\BSTU\5 семестр\СП\Lab01_FileMapping\OS10\x64\Debug\OS10_04.exe

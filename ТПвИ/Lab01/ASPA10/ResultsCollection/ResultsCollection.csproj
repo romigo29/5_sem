@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PackageId>BSTU.Results.Collection</PackageId>
+    <Title>ResultsCollection</Title>
+    <Authors>BSTU</Authors>
+    <Description>Thread-safe JSON-backed results collection service for ASP.NET Core</Description>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Authenticate\Authenticate.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch</title>
+</head>
+
+<body>
+    <h1>Здесь появится ФИО: </h1>
+    <div id='fio'></div>
+</body>
+
+<script>
+    const PATH = 'http://localhost:5000/api/name'
+
+    fetch(PATH)
+        .then(response => {
+            if (!response.ok) throw new Error("Ошибка: " + response.status);
+            return response.text()
+
+        })
+        .then(data => {
+            document.getElementById('fio').innerText = data;
+        })
+        .catch(err => {
+            console.log('Fetch error: ', err)
+        })
+
+</script>
+
+</html>

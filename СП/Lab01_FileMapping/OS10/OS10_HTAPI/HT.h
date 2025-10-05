@@ -1,99 +1,106 @@
 #pragma once
 #include "pch.h" 
+#define SECOND 10000000
 #define SIZE 512
 
-namespace HT      
+namespace HT
 {
 
-	struct HTHANDLE       
+	struct HTHANDLE
 	{
 		HTHANDLE();
 		HTHANDLE(int Capacity, int SecSnapshotInterval, int MaxKeyLength, int MaxPayloadLength, const char FileName[SIZE]);
-		int     Capacity;                     
-		int     SecSnapshotInterval;         
-		int     MaxKeyLength;              
-		int     MaxPayloadLength;          
-		char    FileName[SIZE];             
-		HANDLE  File;                          
-		HANDLE  FileMapping;                      
-		LPVOID  Addr;                           
-		char    LastErrorMessage[SIZE];          
-		time_t  lastsnaptime;                 
+		int     Capacity;
+		int     SecSnapshotInterval;
+		int     MaxKeyLength;
+		int     MaxPayloadLength;
+		char    FileName[SIZE];
+		HANDLE  File;
+		HANDLE  FileMapping;
+		LPVOID  Addr;
+		char    LastErrorMessage[SIZE];
+		time_t  LastSnapTime;
+
+		HANDLE SnapshotTimer;
+		HANDLE Mutex;
 	};
 
-	struct Element     
+	struct Element
 	{
 		Element();
-		Element(const void* key, int keylength);                                               
-		Element(const void* key, int keylength, const void* payload, int  payloadlength);      
-		Element(Element* oldelement, const void* newpayload, int  newpayloadlength);           
-		const void* key;                    
-		int             keylength;         
-		const void* payload;               
-		int             payloadlength;     
+		Element(const void* key, int keylength);
+		Element(const void* key, int keylength, const void* payload, int  payloadlength);
+		Element(Element* oldelement, const void* newpayload, int  newpayloadlength);
+		const void* key;
+		int             keylength;
+		const void* payload;
+		int             payloadlength;
 	};
 
-	HTHANDLE* Create                   
+	HTHANDLE* Create
 	(
-		int	  Capacity,					     
-		int   SecSnapshotInterval,		       
-		int   MaxKeyLength,                   
-		int   MaxPayloadLength,               
-		const char  FileName[SIZE]             
-	); 	      
+		int	  Capacity,
+		int   SecSnapshotInterval,
+		int   MaxKeyLength,
+		int   MaxPayloadLength,
+		const char  FileName[SIZE]
+	);
 
-	HTHANDLE* Open                     
+	HTHANDLE* Open
 	(
-		const char    FileName[SIZE]            
-	); 	      
+		const char    FileName[SIZE]
+	);
 
-	BOOL Snap           
+	BOOL Snap
 	(
-		const HTHANDLE* hthandle               
+		HTHANDLE* hthandle
 	);
 
 
-	BOOL Close                 
+	BOOL Close
 	(
-		const HTHANDLE* hthandle               
-	);	        
-
-
-	BOOL Insert          
-	(
-		HTHANDLE* hthandle,              
-		const Element* element               
-	);	      
-
-
-	BOOL Delete          
-	(
-		HTHANDLE* hthandle,               
-		const Element* element                
-	);	      
-
-	Element* Get          
-	(
-		const HTHANDLE* hthandle,              
-		const Element* element                
-	); 	      
-
-
-	BOOL Update          
-	(
-		HTHANDLE* hthandle,             
-		const Element* oldelement,               
-		const void* newpayload,				    
-		int   newpayloadlength				   
-	); 	      
-
-	char* GetLastError       
-	(
-		HTHANDLE* ht                           
+		HTHANDLE* hthandle
 	);
 
-	void print                                  
+
+	BOOL Insert
 	(
-		const Element* element                
+		HTHANDLE* hthandle,
+		const Element* element
+	);
+
+
+	BOOL Delete
+	(
+		HTHANDLE* hthandle,
+		const Element* element
+	);
+
+	Element* Get
+	(
+		HTHANDLE* hthandle,
+		const Element* element
+	);
+
+
+	BOOL Update
+	(
+		HTHANDLE* hthandle,
+		const Element* oldelement,
+		const void* newpayload,
+		int   newpayloadlength
+	);
+
+	BOOL StartSnapshotAsync(HTHANDLE* htHandle);
+	void CALLBACK snapAsync(LPVOID prm, DWORD, DWORD);
+
+	char* GetLastError
+	(
+		HTHANDLE* ht
+	);
+
+	void print
+	(
+		const Element* element
 	);
 };

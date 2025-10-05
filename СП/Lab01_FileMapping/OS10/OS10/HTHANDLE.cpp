@@ -9,10 +9,13 @@ HTHANDLE::HTHANDLE() :
     File(INVALID_HANDLE_VALUE),
     FileMapping(NULL),
     Addr(NULL),
-    lastsnaptime(0)
+    Mutex(NULL),
+    SnapshotTimer(NULL),
+    LastSnapTime(0)
 {
     FileName[0] = '\0';
     LastErrorMessage[0] = '\0';
+
 }
 
 HTHANDLE::HTHANDLE(int capacity, int secSnapshotInterval, int maxKeyLength,
@@ -23,7 +26,10 @@ HTHANDLE::HTHANDLE(int capacity, int secSnapshotInterval, int maxKeyLength,
     MaxPayloadLength(maxPayloadLength),
     File(INVALID_HANDLE_VALUE),
     FileMapping(NULL),
-    Addr(NULL)
+    Addr(NULL),
+    Mutex(NULL),
+    SnapshotTimer(NULL),
+    LastSnapTime(0)
 {
     strncpy_s(FileName, fileName, SIZE);
     LastErrorMessage[0] = '\0';

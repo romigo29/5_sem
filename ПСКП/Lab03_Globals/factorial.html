@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Факториалы через fetch</title>
+</head>
+
+<body>
+    <h2>Вычисление факториалов (0..20)</h2>
+    <div id="results"></div>
+    <script>
+        const resultsDiv = document.getElementById('results');
+        const start = Date.now();
+
+        async function run() {
+            for (let x = 0; x <= 20; x++) {
+                const response = await fetch(`/fact?k=${x}`);
+                const data = await response.json();
+                const passedTime = Date.now() - start;
+                resultsDiv.innerHTML +=
+                    `${x}.Результат: ${passedTime}-${data.k}/${data.fact}</br>`;
+            }
+            const total = Date.now() - start;
+            resultsDiv.innerHTML += "<br><b>Общая продолжительность цикла: " + total + " мс</br>";
+        }
+
+        run();
+    </script>
+</body>
+
+</html>

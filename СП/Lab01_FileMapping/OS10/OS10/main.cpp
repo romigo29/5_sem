@@ -44,6 +44,7 @@ int main()
 
         print(htel);
 
+        Sleep(ht->SecSnapshotInterval * 1000);
         if (Close(ht)) 
             cout << "Close: success" << endl;
         else throw "Close: error";
@@ -74,6 +75,8 @@ int main()
         if (Delete(ht, hte))
             cout << "Delete: success" << endl;
         else throw "Delete: error";
+
+        Sleep(ht2->SecSnapshotInterval * 1000);
 
         if (Close(ht2)) 
             cout << "Close: success" << endl;

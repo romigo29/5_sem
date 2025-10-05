@@ -4,17 +4,16 @@ select * from dba_pdbs;
 --task2
 select * from V$INSTANCE;
 
---task3?
-select * from v$option;
+--task3
 select * from dba_registry;
+
 
 --task4-5
 select * from dba_pdbs;
 
-
 --task6-----------------------------------------
-select * from v$pdbs;
 alter session set "_ORACLE_SCRIPT" = true;
+
 alter session set container = RIV_PDB;
 alter pluggable database RIV_PDB open;
 alter session set container = CDB$ROOT;
@@ -27,14 +26,14 @@ size 7M
 autoextend on next 5M
 maxsize 100M;
 
-select TABLESPACE_NAME, STATUS, contents logging from SYS.DBA_TABLESPACES;
-
 --temp tablespace
 create temporary tablespace TS_U1_TEMP
 tempfile 'C:\app\Tablespaces\TS_U1_TEMP.dbf'
 size 5M
 autoextend on next 3M
 maxsize 30M;
+
+select TABLESPACE_NAME, STATUS, contents logging from SYS.DBA_TABLESPACES;
 
 --role
 alter session set "_ORACLE_SCRIPT" = true
@@ -97,7 +96,6 @@ drop table RIV_table;
 
 --task8
 select * from dba_tablespaces where TABLESPACE_NAME like 'TS%';
-select * from dba_temp_files;
 select * from dba_roles where ROLE like 'RL%';
 select * from dba_sys_privs where GRANTEE like 'RL%';
 select * from dba_profiles where PROFILE like 'PF_U1%';
@@ -109,12 +107,8 @@ alter session set container = RIV_PDB;
 show con_name
 
 
-alter pluggable database riv_pdb open;
-
-grant create session to C##RIV container=all;
-
-CREATE USER C##RIV IDENTIFIED BY 1111
-CONTAINER=ALL;
+create user C##RIV identified by 1111
+container=all;
 grant 
     create session, 
     alter session, 
@@ -123,24 +117,16 @@ grant
 to C##RIV container = all;
 
 select * from dba_users where username = 'C##RIV';
-select username, common, con_id from cdb_users where username = 'C##RIV';
-select * from dba_sys_privs where grantee = 'C##RIV';
-
-alter session set container = RIV_PDB;
-
-
-
-drop user C##RIV;
-REVOKE CREATE SESSION FROM C##RIV CONTAINER=ALL;
-REVOKE ALTER SESSION FROM C##RIV CONTAINER=ALL;
-REVOKE CREATE ANY TABLE FROM C##RIV CONTAINER=ALL;
-REVOKE DROP ANY TABLE FROM C##RIV CONTAINER=ALL;
 
 
 create table x (id int);
 drop table x;
-
-
 --task11
+alter session set container = CDB$ROOT;
+show con_name;
+alter pluggable database RIV_PDB close immediate;
 drop pluggable database RIV_PDB including datafiles;
-
+select name,open_mode from v$pdbs;
+drop user C##RIV;
+------
+ALTER PLUGGABLE DATABASE ORCLPDB OPEN;

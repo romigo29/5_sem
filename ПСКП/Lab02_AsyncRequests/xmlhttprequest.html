@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XMLHTTPRequest</title>
+</head>
+
+<body>
+    <h1>Здесь появится ФИО: </h1>
+    <div id='fio'></div>
+</body>
+
+<script>
+    let xhr = new XMLHttpRequest();
+
+    xhr.open("GET", "/api/name", true);
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            document.getElementById("fio").innerText = xhr.responseText;
+        } else {
+            document.getElementById("fio").innerText = "Ошибка: " + xhr.status;
+        }
+    };
+
+    xhr.send();
+</script>
+
+</html>
