@@ -10,8 +10,9 @@ namespace ResultsAuthenticate
 
 	public interface IAuthenticateService
 	{
-		Task<bool> SignInAsync(string login, string password);
+		Task<SignInResult> SignInAsync(string login, string password);
 		Task SignOutAsync();
-		ClaimsPrincipal? CurrentUser { get; }
+
+		Task<IdentityUser?> FindByNameAsync(string login);
 	}
 }

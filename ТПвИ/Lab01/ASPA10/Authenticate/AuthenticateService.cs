@@ -15,42 +15,38 @@ namespace ResultsAuthenticate
 		{
 		}
 
-		// Если нужно, добавляй свои таблицы:
-		// public DbSet<ResultItem> Results { get; set; }
 	}
 
 	public class AuthenticateService : IAuthenticateService
 	{
 		private readonly UserManager<IdentityUser> _userManager;
 		private readonly SignInManager<IdentityUser> _signInManager;
-		private readonly IHttpContextAccessor _httpContextAccessor;
-
+		
 		public AuthenticateService(
 			UserManager<IdentityUser> userManager,
-			SignInManager<IdentityUser> signInManager,
-			IHttpContextAccessor httpContextAccessor)
+			SignInManager<IdentityUser> signInManager)
 		{
 			_userManager = userManager;
 			_signInManager = signInManager;
-			_httpContextAccessor = httpContextAccessor;
+	
 		}
 
-		public ClaimsPrincipal? CurrentUser => _httpContextAccessor.HttpContext?.User;
-
-		public async Task<bool> SignInAsync(string login, string password)
+		public async Task<SignInResult> SignInAsync(string login, string password)
 		{
 			var user = await _userManager.FindByNameAsync(login);
-			if (user == null) return false;
+			if (user == null) return SignInResult.Failed;
 
 			var result = await _signInManager.PasswordSignInAsync(
 				user, password, isPersistent: true, lockoutOnFailure: false);
 
-			return result.Succeeded;
+			return result;
 		}
 
 		public async Task SignOutAsync()
 		{
 			await _signInManager.SignOutAsync();
 		}
+
+		public Task<IdentityUser?> FindByNameAsync(string login) => _userManager.FindByNameAsync(login);
 	}
 }

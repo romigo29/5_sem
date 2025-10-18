@@ -1,57 +1,36 @@
-var http = require('http')
-const readline = require('readline');
+const http = require("http");
 
-const PORT = 5000;
-const validStates = ['norm', 'stop', 'test', 'idle'];
-let currentAppState = 'norm';
-
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-})
-
-const changeState = () => {
-    rl.question(`${currentAppState}->`, (input) => {
-
-        input = input.trim().toLowerCase();
-
-        if (validStates.includes(input)) {
-            console.log(`reg=${currentAppState}->${input}`);
-            currentAppState = input;
-        }
-
-        else if (input == 'exit') {
-            console.log("Exiting program...");
-            rl.close();
-            process.exit(0);
-        }
-
-        else {
-            console.log('Invalid Value.\n Valid options: norm, stop, test, idle, exit')
-        }
-
-        changeState();
-
-    });
-}
+const validStates = ["norm", "stop", "test", "idle", "exit"];
+let currentState = "norm";
 
 http.createServer(function (request, response) {
+    response.writeHead("200", { "content-type": "text/html; charset=utf-8" });
+    response.end(`<h1>${currentState}<h1>`);
+}).listen(5000, () => {
+    console.log("Server running at http://localhost:5000/");
 
-    if (request.url === '/' && request.method === 'GET') {
-        response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
-        response.end(`<html>
-                    <head><title>App State</title></head>
-                    <body>
-                    <h1>${currentAppState}</h1>
-                    </body>
-                    </html>`);
-    } else {
-        response.writeHead(404, { 'content-type': 'text/plain' });
-        response.end('Not found');
+});
+
+process.stdin.setEncoding("utf-8");
+process.stdin.on("readable", () => {
+    
+    let chunk = null;
+    while ((chunk = process.stdin.read()) != null) {
+        let trimmedInput = chunk.trim();
+
+        if (validStates.includes(trimmedInput)) {
+            process.stdout.write(`${currentState} -> ${trimmedInput}\n`);
+
+            if (trimmedInput === "exit") {
+                process.exit(0);
+            }
+            else {
+                currentState = trimmedInput;
+            }
+        }
+        else {
+            process.stdout.write(`Неверное состояние: ${trimmedInput}\n`);
+        }
     }
-}).listen(PORT);
-
-console.log(`Server running at http://localhost:${PORT}/`);
-changeState();
-
+});
 
