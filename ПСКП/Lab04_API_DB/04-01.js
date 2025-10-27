@@ -7,35 +7,35 @@ const PATH = '/api/db'
 
 var db = new data.DB();
 
-db.on('GET', async (request, response) => {
+db.on('GET', (request, response) => {
     console.log('DB.GET');
     response.writeHead(200, { 'content-type': 'application/json;charset=utf-8' });
     response.end(JSON.stringify(db.select()))
 
 });
 
-db.on('POST', async (request, response) => {
+db.on('POST', (request, response) => {
     console.log('DB.POST');
     request.on('data', data => {
         let row = JSON.parse(data);
         db.insert(row);
         response.writeHead(200, { 'content-type': 'application/json;charset=utf-8' });
-        response.end(JSON.stringify(db.select()))
+        response.end(JSON.stringify(row));
     })
 });
 
 
-db.on('PUT', async (request, response) => {
+db.on('PUT', (request, response) => {
     console.log('DB.PUT');
     request.on('data', data => {
         let row = JSON.parse(data);
         db.update(row);
         response.writeHead(200, { 'content-type': 'application/json;charset=utf-8' });
-        response.end(JSON.stringify(db.select()))
+        response.end(JSON.stringify(db.select()));
     })
 });
 
-db.on('DELETE', async (request, response) => {
+db.on('DELETE', (request, response) => {
     console.log('DB.DELETE');
     let parsedURL = url.parse(request.url, true);
     const id = parsedURL.query.id;
@@ -45,7 +45,7 @@ db.on('DELETE', async (request, response) => {
         response.end('<h1>400 Bad request</h1>')
     }
 
-    const deletedRow = await db.delete(id);
+    const deletedRow = db.delete(id);
     response.writeHead(200, { 'content-type': 'application/json;charset=utf-8' });
     response.end(JSON.stringify(deletedRow));
 });

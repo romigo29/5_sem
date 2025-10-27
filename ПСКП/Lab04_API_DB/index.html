@@ -63,7 +63,6 @@
         console.log('GET pressed');
         fetch("http://localhost:5000/api/db", {
             method: "GET",
-            mode: "no-cors",
             headers: { 'content-type': 'application/json;charset=utf-8', 'accept': 'application/json' }
         })
             .then(response => { return response.json(); })
@@ -86,7 +85,6 @@
         console.log('POST pressed');
         fetch("http://localhost:5000/api/db", {
             method: "POST",
-            mode: "no-cors",
             headers: { 'content-type': 'application/json;charset=utf-8', 'accept': 'application/json' },
             body: JSON.stringify({ id: ID.value, name: NAME.value, bday: BDAY.value })
         })

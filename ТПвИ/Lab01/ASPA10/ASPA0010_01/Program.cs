@@ -29,7 +29,7 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(o =>
 builder.Services.AddScoped<IAuthenticateService, AuthenticateService>();
 builder.Services.AddTransient<IResultsService>(sp =>
 {
-	var path = Path.Combine(builder.Environment.ContentRootPath, "results.json");
+	var path = Path.Combine(Directory.GetCurrentDirectory(), "results.json");
 	return new ResultsService(path);
 });
 
@@ -63,28 +63,49 @@ app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())
 {
-	var services = scope.ServiceProvider;
-	var db = services.GetRequiredService<ApplicationDbContext>();
-	db.Database.Migrate();   
+    var services = scope.ServiceProvider;
+    var db = services.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
 
-	var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-	var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
 
-	string[] roles = new[] { "READER", "WRITER" };
-	foreach (var role in roles)
-	{
-		if (!await roleManager.RoleExistsAsync(role))
-			await roleManager.CreateAsync(new IdentityRole(role));
-	}
+    string[] roles = new[] { "READER", "WRITER" };
+    foreach (var role in roles)
+    {
+        if (!await roleManager.RoleExistsAsync(role))
+            await roleManager.CreateAsync(new IdentityRole(role));
+    }
 
-	var testUser = await userManager.FindByNameAsync("admin");
-	if (testUser == null)
-	{
-		testUser = new IdentityUser { UserName = "admin", Email = "admin@example.com", EmailConfirmed = true };
-		await userManager.CreateAsync(testUser, "Admin123!");
-		await userManager.AddToRolesAsync(testUser, roles);
-	}
+    // Пользователь для роли READER
+    var readerUser = await userManager.FindByNameAsync("reader");
+    if (readerUser == null)
+    {
+        readerUser = new IdentityUser
+        {
+            UserName = "reader",
+            Email = "reader@example.com",
+            EmailConfirmed = true
+        };
+        await userManager.CreateAsync(readerUser, "Reader123!");
+        await userManager.AddToRoleAsync(readerUser, "READER");
+    }
+
+    // Пользователь для роли WRITER
+    var writerUser = await userManager.FindByNameAsync("writer");
+    if (writerUser == null)
+    {
+        writerUser = new IdentityUser
+        {
+            UserName = "writer",
+            Email = "writer@example.com",
+            EmailConfirmed = true
+        };
+        await userManager.CreateAsync(writerUser, "Writer123!");
+        await userManager.AddToRoleAsync(writerUser, "WRITER");
+    }
 }
+
 
 app.MapControllers();
 

@@ -81,3 +81,6 @@ show parameter dispatcher; --sqlplus
 
 --task18
 --C:\app\WINBLUE_VM\product\12.2.0\dbhome_1\network\admin
+
+
+--task19 lsnrctl services

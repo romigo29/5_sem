@@ -52,7 +52,7 @@ namespace ASPA0010_1.Controllers
 			if (string.IsNullOrWhiteSpace(value)) return BadRequest("Value should not be empty");
 
 			var key = await _resultsService.AddAsync(value);
-			return CreatedAtAction(nameof(GetByKeyAsync), new { key}, new {key , value });
+			return Ok(key);
 		}
 
 		[HttpPut("{k:int}")]
