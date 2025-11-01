@@ -1,0 +1,14 @@
+{
+  "name": "m0603-romigo",
+  "version": "1.0.0",
+  "description": "Module for sending mails with Nodemailer",
+  "main": "m0603.js",
+  "scripts": {
+    "test": "echo \\\"Error: no test specified\\\" && exit 1"
+  },
+  "author": "romigo",
+  "license": "ISC",
+  "dependencies": {
+    "nodemailer": "^7.0.10"
+  }
+}
