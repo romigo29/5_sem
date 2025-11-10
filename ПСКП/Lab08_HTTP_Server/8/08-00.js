@@ -133,22 +133,6 @@ function handleSocket(request, response) {
   write200Html(response, html);
 }
 
-// function handleReqData(request, response) {
-//   if (request.method !== "GET") {
-//     return write405(response);
-//   }
-//   let body = "";
-
-//   request.on("data", (chunk) => {
-//     console.log(`request.on("data"): ${chunk.length} bytes`);
-//     body += chunk;
-//   });
-
-//   request.on("end", () => {
-//     write200Html(response, `<p>got = ${body.length}<p>Received data: ${body}<p>`);
-//   });
-// }
-
 function handleReqData(request, response) {
   if (request.method !== "GET") {
     return write405(response);

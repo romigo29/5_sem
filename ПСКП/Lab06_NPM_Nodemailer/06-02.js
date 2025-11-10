@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 const querystring = require('querystring');
 
 const EMAIL = "pigeon99905@gmail.com";
-const APP_PASSWORD = "kjbj mvsb gadj cjxx";
+const APP_PASSWORD = "gmail password here";
 
 const PORT = 5000;
 
