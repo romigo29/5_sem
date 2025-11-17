@@ -87,14 +87,14 @@ int main()
         memset(&serv, 0, sizeof(serv));
         serv.sin_family = AF_INET;
         serv.sin_port = htons(2000);
-        serv.sin_addr.s_addr = inet_addr("127.0.0.1");    
+        serv.sin_addr.s_addr = inet_addr("10.78.133.48");    
 
         if (connect(clientSock, (sockaddr*)&serv, sizeof(serv)) == SOCKET_ERROR) {
             int err = WSAGetLastError();
             throw SetErrorMsgText("connect failed", err);
         }
 
-        cout << "Connected to server (127.0.0.1:2000)." << endl;
+        cout << "Connected to server " << endl;
 
         int iterations = 0;
         cout << "Enter number of messages (e.g. 1000): ";

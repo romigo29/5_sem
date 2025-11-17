@@ -11,7 +11,7 @@
 
 using namespace std;
 
-string GetErrorMsgText(int code)
+string GetErrorMsgText(int code)+
 {
     string msgText;
     switch (code)
@@ -75,6 +75,7 @@ int main()
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
+    bool wsStarted = false;
     SOCKET listenSocket = INVALID_SOCKET;
 
     try
@@ -84,9 +85,9 @@ int main()
         if (wsaInitResult != 0) {
             throw SetErrorMsgText("WSAStartup failed", wsaInitResult);
         }
+        wsStarted = true;
 
-
-        listenSocket = socket(AF_INET, SOCK_STREAM, NULL);
+        listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (listenSocket == INVALID_SOCKET) {
             throw SetErrorMsgText("socket failed", WSAGetLastError());
         }
@@ -132,7 +133,7 @@ int main()
 
             while (true)
             {
-                int received = recv(clientSocket, buffer, BUF_SIZE, NULL);       
+                int received = recv(clientSocket, buffer, BUF_SIZE, 0);       
                 if (received == SOCKET_ERROR)
                 {
                     cerr << "recv error: " << GetErrorMsgText(WSAGetLastError()) << " (" << WSAGetLastError() << ")" << endl;
@@ -144,6 +145,8 @@ int main()
                     break;
                 }
 
+                int toPrint = (received < BUF_SIZE) ? received : BUF_SIZE;
+                buffer[toPrint] = '\0';
                 cout << "Received (" << received << " bytes): " << buffer << endl;
 
                 int sent = send(clientSocket, buffer, received, 0);
@@ -167,15 +170,20 @@ int main()
     {
         cerr << "Exception: " << errMsg << endl;
     }
-
+    catch (...)
+    {
+        cerr << "Unknown exception occurred." << endl;
+    }
 
     if (listenSocket != INVALID_SOCKET) {
         closesocket(listenSocket);
         listenSocket = INVALID_SOCKET;
     }
-    WSACleanup();
-
+    if (wsStarted) {
+        WSACleanup();
+    }
 
     cout << "Server terminated." << endl;
     return 0;
 }
+

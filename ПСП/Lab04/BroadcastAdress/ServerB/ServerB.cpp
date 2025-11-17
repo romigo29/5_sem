@@ -24,11 +24,12 @@ bool GetServer(char* call, short port, sockaddr* from, int* flen)
 		throw SetErrorMsgText("sendto:", WSAGetLastError());
 	}
 
+	int count = 0;
 	if ((err = recvfrom(cS, call, sizeof(call), NULL, from, flen) == SOCKET_ERROR))
 	{
 		return false;
 	}
-	cout << call << endl;
+	cout << "Ответ от сервера: " << ++count << ": " << call << endl;
 	return true;
 
 }
@@ -81,7 +82,7 @@ void main()
 			throw SetErrorMsgText("socket create: ", WSAGetLastError());
 		}
 
-		DWORD timeout = 10;
+		DWORD timeout = 1000;
 		if (setsockopt(cS, SOL_SOCKET, SO_BROADCAST, (char*)&timeout, sizeof(int)) == SOCKET_ERROR)
 		{
 			throw SetErrorMsgText("setsockopt: ", WSAGetLastError());
@@ -150,6 +151,11 @@ void main()
 			std::cout << endl << "IP: " << inet_ntoa(from.sin_addr) << "\tport: " << htons(from.sin_port) << endl;
 			lbfrom = sizeof(from);
 
+			if (!PutAnswerToClient(name, (sockaddr*)&from, &lbfrom))
+			{
+				throw SetErrorMsgText("put answer: ", WSAGetLastError());
+			}
+
 			struct in_addr ip_addr = from.sin_addr;
 			struct hostent* addr = gethostbyaddr((const char*)&ip_addr, sizeof(ip_addr), AF_INET);
 
@@ -157,10 +163,7 @@ void main()
 				cout << "host name: " << addr->h_name << endl;
 			}
 
-			if (!PutAnswerToClient(name, (sockaddr*)&from, &lbfrom))
-			{
-				throw SetErrorMsgText("put answer: ", WSAGetLastError());
-			}
+		
 		}
 
 
