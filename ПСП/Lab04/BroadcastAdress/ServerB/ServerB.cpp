@@ -12,27 +12,71 @@ SOCKET cS;
 
 bool GetServer(char* call, short port, sockaddr* from, int* flen)
 {
-	SOCKADDR_IN all;
-	all.sin_addr.s_addr = INADDR_BROADCAST;
-	all.sin_family = AF_INET;
-	all.sin_port = htons(2000);
-	from = (sockaddr*)&all;
-	int err = 0;
-
-	if ((err = sendto(cS, call, strlen(call) + 1, NULL, from, *flen) == SOCKET_ERROR))
+	SOCKET cS;     
+	if ((cS = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
 	{
-		throw SetErrorMsgText("sendto:", WSAGetLastError());
+		throw SetErrorMsgText("socket create: ", WSAGetLastError());
 	}
+
+	BOOL bcast = TRUE;
+	if (setsockopt(cS, SOL_SOCKET, SO_BROADCAST, (char*)&bcast, sizeof(bcast)) == SOCKET_ERROR)
+	{
+		throw SetErrorMsgText("setsockopt SO_BROADCAST: ", WSAGetLastError());
+	}
+
+	SOCKADDR_IN all;
+	all.sin_family = AF_INET;
+	all.sin_port = htons(port);
+	all.sin_addr.s_addr = INADDR_BROADCAST;
+	memcpy(from, &all, sizeof(all));
+
+	int err = sendto(cS, call, strlen(call) + 1, 0, (sockaddr*)&all, sizeof(all));
+	if (err == SOCKET_ERROR)
+	{
+		throw SetErrorMsgText("sendto: ", WSAGetLastError());
+	}
+
+	timeval tv;
+	tv.tv_sec = 1;   
+	tv.tv_usec = 0;
+	fd_set readfds;
 
 	int count = 0;
-	if ((err = recvfrom(cS, call, sizeof(call), NULL, from, flen) == SOCKET_ERROR))
+	while (true)
 	{
-		return false;
-	}
-	cout << "Ответ от сервера: " << ++count << ": " << call << endl;
-	return true;
+		FD_ZERO(&readfds);
+		FD_SET(cS, &readfds);
 
+		int sel = select(0, &readfds, NULL, NULL, &tv);
+		if (sel > 0 && FD_ISSET(cS, &readfds))
+		{
+			char buffer[100];
+			sockaddr_in sender;
+			int senderLen = sizeof(sender);
+
+			int recvBytes = recvfrom(cS, buffer, sizeof(buffer), 0, (sockaddr*)&sender, &senderLen);
+			if (recvBytes == SOCKET_ERROR)
+			{
+				int errCode = WSAGetLastError();
+				if (errCode == WSAETIMEDOUT) break;     
+				throw SetErrorMsgText("recvfrom: ", errCode);
+			}
+
+			count++;
+			cout << "Ответ от сервера " << count << ": " << buffer
+				<< " (IP: " << inet_ntoa(sender.sin_addr) << ", порт: " << ntohs(sender.sin_port) << ")" << endl;
+		}
+		else
+		{
+			break;    
+		}
+	}
+	cout << "Всего серверов в сети: " << ++count << endl;
+	closesocket(cS);
+
+	return count > 0;      
 }
+
 bool GetRequestFromClient(char* name, short port, sockaddr* from, int* flen)
 {
 	char bfrom[50];
@@ -96,14 +140,10 @@ void main()
 
 		SOCKADDR_IN all;
 		int allLen = sizeof(all);
-		if (GetServer(name, 2000, (sockaddr*)&all, &allLen))
-		{
-			cout << "В сети есть несколько серверов с позывным " << name << endl;
-		}
-		else
-		{
-			cout << "В сети один сервер с позывным " << name << endl;
-		}
+
+		GetServer(name, 2000, (sockaddr*)&all, &allLen);
+
+
 		if (closesocket(cS) == SOCKET_ERROR)
 		{
 			throw SetErrorMsgText("close socket: ", WSAGetLastError());
