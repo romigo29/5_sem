@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define PIPE_NAME L"\\\\.\\pipe\\Tube"   
+#define PIPE_NAME L"\\\\PCI\\pipe\\Tube"   
 #define MAX_SIZE_OF_BUFFER 512
 
 string GetErrorMsgText(int code)

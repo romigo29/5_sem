@@ -14,21 +14,26 @@ int main()
     SetConsoleCP(1251);
     SetConsoleOutputCP(1251);
 
-    HANDLE cH;   
+    HANDLE cH; // дескриптор канала
     DWORD dwWrite;
     char buffer[50] = "start";
 
     try
     {
+        string serverName;
+        cout << "Введите имя сервера: ";
+        cin >> serverName;
 
-        string pipeFullName = "\\\\PCI\\pipe\\Tube";
+        // сетевой формат имени канала
+        string pipeFullName = "\\\\" + serverName + "\\pipe\\Tube";
 
+        // CreateFile для подключения к серверу по сети
         if ((cH = CreateFileA(
-            pipeFullName.c_str(),         
-            GENERIC_READ | GENERIC_WRITE,    
-            0,                              
-            NULL,                           
-            OPEN_EXISTING,                  
+            pipeFullName.c_str(),       // Имя канала
+            GENERIC_READ | GENERIC_WRITE, // Чтение и запись
+            0,                           // Нет совместного доступа
+            NULL,                        // Без атрибутов безопасности
+            OPEN_EXISTING,               // Открытие существующего канала
             0,
             NULL)) == INVALID_HANDLE_VALUE)
         {
@@ -45,7 +50,7 @@ int main()
 
         for (int i = 1; i <= countOfMessages; i++)
         {
-
+      
 
             if (!WriteFile(cH, buffer, strlen(buffer), &dwWrite, NULL))
             {
@@ -74,6 +79,7 @@ int main()
     return 0;
 }
 
+// Функции обработки ошибок (как у тебя)
 string GetErrorMsgText(int code)
 {
     switch (code)
@@ -90,4 +96,3 @@ string SetPipeError(string msgText, int code)
 {
     return msgText + GetErrorMsgText(code) + "\n";
 }
-

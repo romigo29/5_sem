@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#define PIPE_NAME L"\\\\.\\pipe\\Tube"   
+#define PIPE_NAME L"\\\\PCI\\pipe\\Tube" // Локальный канал
 #define MAX_SIZE_OF_BUFFER 512
 
 string GetErrorMsgText(int code)
@@ -38,12 +38,13 @@ int main()
 
     try
     {
+        // Подключаемся к серверу
         HANDLE hPipe = CreateFile(
             PIPE_NAME,
             GENERIC_READ | GENERIC_WRITE,
-            0,                 
-            NULL,             
-            OPEN_EXISTING,     
+            0,              // Нет совместного доступа
+            NULL,           // Атрибуты безопасности
+            OPEN_EXISTING,  // Открыть существующий канал
             0,
             NULL
         );
@@ -51,12 +52,14 @@ int main()
         if (hPipe == INVALID_HANDLE_VALUE)
             throw SetPipeError("CreateFile: ", GetLastError());
 
+        // Устанавливаем режим сообщений
         DWORD mode = PIPE_READMODE_MESSAGE;
         if (!SetNamedPipeHandleState(hPipe, &mode, NULL, NULL))
             throw SetPipeError("SetNamedPipeHandleState: ", GetLastError());
 
         cout << "Отправка серверу: " << buffer << endl;
 
+        // Отправка и получение ответа
         if (!TransactNamedPipe(
             hPipe,
             buffer,
@@ -69,7 +72,7 @@ int main()
             throw SetPipeError("TransactNamedPipe: ", GetLastError());
         }
 
-        outbuffer[bytesRead] = '\0';   
+        outbuffer[bytesRead] = '\0'; // конец строки
         cout << "Сервер ответил: " << outbuffer << endl;
 
         CloseHandle(hPipe);
