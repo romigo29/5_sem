@@ -1,4 +1,4 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS
+ï»¿#define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <tchar.h>
@@ -14,94 +14,89 @@ bool GetServer(char* call, short port, sockaddr* from, int* flen)
 {
 	memset(from, 0, sizeof(flen));
 
-	if ((clientSocket = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
-	{
-		throw  SetErrorMsgText("socket:", WSAGetLastError());
-	}
-
 	int optval = 1;
-	if (setsockopt(clientSocket,
-		SOL_SOCKET,
-		SO_BROADCAST,
-		(char*)&optval,
-		sizeof(int)) == SOCKET_ERROR)
-	{
-		throw  SetErrorMsgText("opt:", WSAGetLastError());
-	}
+	setsockopt(clientSocket, SOL_SOCKET, SO_BROADCAST, (char*)&optval, sizeof(int));
+
+	int timeout = 1000;     
+	setsockopt(clientSocket, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
 
 	SOCKADDR_IN all;
 	all.sin_family = AF_INET;
-	all.sin_port = htons(2000);
+	all.sin_port = htons(port);
 	all.sin_addr.s_addr = INADDR_BROADCAST;
 
-	if ((sendto(clientSocket, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all))) == SOCKET_ERROR)
-	{
-		throw  SetErrorMsgText("sendto:", WSAGetLastError());
-	}
-
-	char nameServer[50];
-	char buffer[50];
-	int pntr = 0;
-	if ((pntr = recvfrom(clientSocket, nameServer, sizeof(nameServer), NULL, from, flen)) == SOCKET_ERROR)
-	{
-		if (WSAGetLastError() == WSAETIMEDOUT)
-		{
-			return false;
-		}
-		else
-		{
-			throw  SetErrorMsgText("recv:", WSAGetLastError());
-		}
-	}
-
-	nameServer[pntr] = 0x00;
-	cout << "Îòâåò îò ñåðâåðà: " << nameServer << endl;
-
-	SOCKADDR_IN* addr = (SOCKADDR_IN*)&from;
-	std::cout << std::endl << "Ïîðò ñåðâåðà: " << addr->sin_port;
-	std::cout << std::endl << "IP-àäðåñ ñåðâåðà: " << inet_ntoa(addr->sin_addr);
-
-	if (!strcmp(nameServer, call))
-	{
-		std::cout << std::endl << "Ñåðâåð ñ òàêèì èìåíåì íàéäåí.";
-		return true;
-	}
-	else
-	{
-		std::cout << std::endl << "Ñåðâåð ñ òàêèì èìåíåì íå íàéäåí.";
-		return false;
-	}
-
-	return true;
-}
-
-bool GetServerByName(const char* name, const char* call, sockaddr* from, int* flen) {
-	hostent* host = gethostbyname(name);
-	if (!host) throw SetErrorMsgText("gethostbyname:", WSAGetLastError());
-
-
-	char* ip_addr = inet_ntoa(*(in_addr*)(host->h_addr));
-	cout << "\nÈìÿ ñåðâåðà: " << host->h_name << endl << "IP-àäðåñ ñåðâåðà: " << ip_addr << endl;
-
-	SOCKADDR_IN server;
-	server.sin_family = AF_INET;                 //IP-àäðåñàöèÿ  
-	server.sin_port = htons(2000);
-	server.sin_addr.s_addr = inet_addr(ip_addr);
-	char message[50];
-
-	if (sendto(clientSocket, call, strlen(call), NULL, (const sockaddr*)&server, *flen) == SOCKET_ERROR)
+	if (sendto(clientSocket, call, strlen(call) + 1, NULL, (sockaddr*)&all, sizeof(all)) == SOCKET_ERROR)
 		throw SetErrorMsgText("sendto:", WSAGetLastError());
 
-	int buf = 0;
-	if ((buf = recvfrom(clientSocket, message, sizeof(message), NULL, (sockaddr*)&server, flen)) == SOCKET_ERROR)
-		throw SetErrorMsgText("recvfrom:", WSAGetLastError());
+	cout << "ÐžÐ¶Ð¸Ð´Ð°Ð½Ð¸Ðµ Ð¾Ñ‚Ð²ÐµÑ‚Ð¾Ð²..." << endl;
 
-	message[buf] = 0x00;
-	cout << "Îòâåò îò ñåðâåðà: " << message << endl;
-	*from = *((sockaddr*)&server);
+	while (true)
+	{
+		char nameServer[50];
+		int pntr = recvfrom(clientSocket, nameServer, sizeof(nameServer), NULL, from, flen);
+
+		if (pntr == SOCKET_ERROR)
+		{
+			if (WSAGetLastError() == WSAETIMEDOUT)
+			{
+				break;
+			}
+			else
+				throw SetErrorMsgText("recv:", WSAGetLastError());
+		}
+
+		nameServer[pntr] = 0;
+
+		SOCKADDR_IN* addr = (SOCKADDR_IN*)from;
+		cout << "ÐžÑ‚Ð²ÐµÑ‚ Ð¾Ñ‚ ÑÐµÑ€Ð²ÐµÑ€Ð°: " << nameServer << endl;
+		cout << "IP ÑÐµÑ€Ð²ÐµÑ€Ð°: " << inet_ntoa(addr->sin_addr) << endl;
+		cout << "ÐŸÐ¾Ñ€Ñ‚ ÑÐµÑ€Ð²ÐµÑ€Ð°: " << htons(addr->sin_port) << endl;
+	}
+
 	return true;
 }
 
+bool GetServerByName(const char* name, const char* call, sockaddr* from, int* flen)
+{
+	if (clientSocket == INVALID_SOCKET)
+		throw SetErrorMsgText("GetServerByName: clientSocket not initialized", WSAGetLastError());
+
+	hostent* host = gethostbyname(name);
+	if (!host)
+		throw SetErrorMsgText("gethostbyname:", WSAGetLastError());
+
+	char* ip_addr = inet_ntoa(*(in_addr*)(host->h_addr));
+	cout << "\nÐ˜Ð¼Ñ ÑÐµÑ€Ð²ÐµÑ€Ð°: " << host->h_name
+		<< "\nIP-Ð°Ð´Ñ€ÐµÑ ÑÐµÑ€Ð²ÐµÑ€Ð°: " << ip_addr << endl;
+
+	SOCKADDR_IN server;
+	memset(&server, 0, sizeof(server));
+	server.sin_family = AF_INET;
+	server.sin_port = htons(2000);
+	server.sin_addr.s_addr = inet_addr(ip_addr);
+
+	if (sendto(clientSocket, call, strlen(call) + 1, 0,
+		(sockaddr*)&server, sizeof(server)) == SOCKET_ERROR)
+	{
+		throw SetErrorMsgText("sendto:", WSAGetLastError());
+	}
+
+	char message[50];
+	int msg_len = recvfrom(clientSocket,
+		message, sizeof(message), 0,
+		(sockaddr*)&server, flen);
+
+	if (msg_len == SOCKET_ERROR)
+		throw SetErrorMsgText("recvfrom:", WSAGetLastError());
+
+	message[msg_len] = 0;
+
+	cout << "ÐžÑ‚Ð²ÐµÑ‚ Ð¾Ñ‚ ÑÐµÑ€Ð²ÐµÑ€Ð°: " << message << endl;
+
+	memcpy(from, &server, sizeof(server));
+
+	return true;
+}
 
 int main()
 {
@@ -110,27 +105,29 @@ int main()
 
 		WSADATA wsaData;
 		if (WSAStartup(MAKEWORD(2, 0), &wsaData) != 0)
-		{
 			throw  SetErrorMsgText("Startup:", WSAGetLastError());
-		}
+
+		if ((clientSocket = socket(AF_INET, SOCK_DGRAM, NULL)) == INVALID_SOCKET)
+			throw SetErrorMsgText("socket:", WSAGetLastError());
 
 		char call[] = "Hello";
-
 		SOCKADDR_IN clnt;
 		int lc = sizeof(clnt);
 
-		GetServer(call, 2000, (sockaddr*)&clnt, &lc);
+		////4
+		//GetServer(call, 2000, (sockaddr*)&clnt, &lc);
 
-		GetServerByName("PCI", call, (sockaddr*)&clnt, &lc);
-		
+		//5
+		string server_name;
+		cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ Ð¸Ð¼Ñ ÑÐµÑ€Ð²ÐµÑ€Ð°: ";
+		cin >> server_name;
+		GetServerByName(server_name.c_str(), call, (sockaddr*)&clnt, &lc);
+
 		if (closesocket(clientSocket) == SOCKET_ERROR)
-		{
 			throw  SetErrorMsgText("closesocket:", WSAGetLastError());
-		}
+
 		if (WSACleanup() == SOCKET_ERROR)
-		{
 			throw  SetErrorMsgText("Cleanup:", WSAGetLastError());
-		}
 
 	}
 	catch (string errorMsgText) {
