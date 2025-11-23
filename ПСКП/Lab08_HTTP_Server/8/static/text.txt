@@ -1,1 +1,1 @@
-это содержимое файла text.txt
+something from file text.txt

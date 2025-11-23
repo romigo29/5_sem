@@ -286,6 +286,7 @@ function handleFiles(request, response) {
         "X-static-files-count": files.length,
       });
 
+
       response.end();
     });
   } else {
@@ -298,6 +299,7 @@ function handleFiles(request, response) {
     const file = fs.readFileSync(filename);
     const ext = path.extname(filename);
 
+    response.setHeader('content-disposition', `attachment; filename="${filename}"`);
     response.writeHead(200, { "Content-Type": MIME[ext] });
     response.end(file);
   }
@@ -324,6 +326,7 @@ function handleUpload(request, response) {
     });
 
     form.parse(request);
+
   } else {
     write405(response);
   }
