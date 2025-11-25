@@ -480,18 +480,31 @@ END;
 select * from TEACHER;
 
 DECLARE
-    rec1 teacher%ROWTYPE;
-    TYPE person IS RECORD (
-        code teacher.teacher%TYPE,
-        name teacher.teacher_name%TYPE
+    TYPE address_record IS RECORD (
+        street   VARCHAR2(100),
+        city     VARCHAR2(50)
     );
-    rec2 person;
+
+    TYPE Emp_with_address_record IS RECORD (
+        emp_id   NUMBER(6),
+        first_name VARCHAR2(50),
+        last_name  VARCHAR2(50),
+        address    address_record
+    );
+
+    emp_with_address Emp_with_address_record;
+    emp_address address_record;
 BEGIN
-    SELECT * INTO rec1 FROM teacher WHERE teacher = 'СМЛВ';
-    SELECT teacher, teacher_name INTO rec2 FROM teacher WHERE teacher = 'УРБ';
-    dbms_output.put_line(rec1.teacher || ' ' || rec1.teacher_name || ' ' || rec1.pulpit);
-    dbms_output.put_line(rec2.code || ' ' || rec2.name);
-EXCEPTION
-    WHEN OTHERS THEN 
-        dbms_output.put_line(sqlerrm);
+    emp_with_address.emp_id := 210;
+    emp_with_address.first_name := 'Igor';
+    emp_with_address.last_name := 'Romanov';
+    
+    emp_address.street := 'Sverdlova';
+    emp_address.city := 'Minsk'; 
+    emp_with_address.address := emp_address;
+
+    DBMS_OUTPUT.PUT_LINE('Employee ID: ' || emp_with_address.emp_id);
+    DBMS_OUTPUT.PUT_LINE('Name: ' || emp_with_address.first_name || ' ' || emp_with_address.last_name);
+    DBMS_OUTPUT.PUT_LINE('Address: ' || emp_with_address.address.street || ', ' || 
+                         emp_with_address.address.city);
 END;
