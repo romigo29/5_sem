@@ -25,7 +25,6 @@ int main()
 
         while (true)
         {
-
             if (ReadFile(
                 hM,
                 rbuf,  

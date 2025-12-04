@@ -38,22 +38,34 @@ int main()
 
     try
     {
-        cout << "Отправка серверу: " << buffer << endl;
+        int countOfMessages;
+        cout << "Введите кол-во сообщений: ";
+        cin >> countOfMessages;
+        cin.ignore();
 
-        if (!CallNamedPipe(
-            PIPE_NAME,             
-            buffer,                
-            (DWORD)strlen(buffer),    
-            outbuffer,             
-            MAX_SIZE_OF_BUFFER,     
-            &bytesRead,             
-            5000))                  
-        {
-            throw SetPipeError("CallNamedPipe:", GetLastError());
+    
+
+        for (int i = 0; i < countOfMessages; i++) {
+
+            cout << "Отправка серверу: " << buffer << endl;
+
+            if (!CallNamedPipe(
+                PIPE_NAME,
+                buffer,
+                (DWORD)strlen(buffer),
+                outbuffer,
+                MAX_SIZE_OF_BUFFER,
+                &bytesRead,
+                5000))
+            {
+                throw SetPipeError("CallNamedPipe:", GetLastError());
+            }
+
+
+            outbuffer[bytesRead] = '\0';
+            cout << "Сервер ответил: " << outbuffer << endl;
         }
 
-        outbuffer[bytesRead] = '\0';   
-        cout << "Сервер ответил: " << outbuffer << endl;
     }
     catch (string errorMsg)
     {

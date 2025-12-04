@@ -57,24 +57,32 @@ int main()
         if (!SetNamedPipeHandleState(hPipe, &mode, NULL, NULL))
             throw SetPipeError("SetNamedPipeHandleState: ", GetLastError());
 
-        cout << "Отправка серверу: " << buffer << endl;
+        int countOfMessages;
+        cout << "Введите кол-во сообщений: ";
+        cin >> countOfMessages;
+        cin.ignore();
+      
 
-        // Отправка и получение ответа
-        if (!TransactNamedPipe(
-            hPipe,
-            buffer,
-            (DWORD)strlen(buffer),
-            outbuffer,
-            MAX_SIZE_OF_BUFFER,
-            &bytesRead,
-            NULL))
-        {
-            throw SetPipeError("TransactNamedPipe: ", GetLastError());
+        for (int i = 0; i < countOfMessages; i++) {
+
+            cout << "Отправка серверу: " << buffer << endl;
+            // Отправка и получение ответа
+            if (!TransactNamedPipe(
+                hPipe,
+                buffer,
+                (DWORD)strlen(buffer),
+                outbuffer,
+                MAX_SIZE_OF_BUFFER,
+                &bytesRead,
+                NULL))
+            {
+                throw SetPipeError("TransactNamedPipe: ", GetLastError());
+            }
+
+            outbuffer[bytesRead] = '\0'; // конец строки
+            cout << "Сервер ответил: " << outbuffer << endl;
+
         }
-
-        outbuffer[bytesRead] = '\0'; // конец строки
-        cout << "Сервер ответил: " << outbuffer << endl;
-
         CloseHandle(hPipe);
     }
     catch (string errorMsg)

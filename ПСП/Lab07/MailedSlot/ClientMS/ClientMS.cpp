@@ -30,6 +30,7 @@ int main()
 
 			string obufstr = "hello " + to_string(i + 1);
 			strcpy_s(obuf, obufstr.c_str());
+
 			if (!WriteFile(
 				hM,
 				obuf,  
@@ -38,6 +39,8 @@ int main()
 				NULL
 			))
 				throw SetErrorMsgText("ReadFileError", WSAGetLastError());
+
+			cout << obuf << endl;
 		}
 		end = clock();
 		cout << "\nВремя передачи: " << ((double)(end - start) / CLK_TCK) << " секунд" << endl;

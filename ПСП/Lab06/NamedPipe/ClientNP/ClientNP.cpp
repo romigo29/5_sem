@@ -4,7 +4,12 @@
 
 using namespace std;
 
+//WIN-UCLB12VI625
+//DESKTOP-V5IB0I0
+
 #define MAX_SIZE_OF_BUFFER 512
+#define PIPE_NAME L"\\\\.\\pipe\\Tube"
+#define PIPE_NAME_LAN L"\\\\Forced\\pipe\\Tube"
 
 string GetErrorMsgText(int code);
 string SetPipeError(string msgText, int code);
@@ -20,16 +25,10 @@ int main()
 
     try
     {
-        string serverName;
-        cout << "Введите имя сервера: ";
-        cin >> serverName;
-
-        // сетевой формат имени канала
-        string pipeFullName = "\\\\" + serverName + "\\pipe\\Tube";
 
         // CreateFile для подключения к серверу по сети
-        if ((cH = CreateFileA(
-            pipeFullName.c_str(),       // Имя канала
+        if ((cH = CreateFileW(
+            PIPE_NAME,       // Имя канала
             GENERIC_READ | GENERIC_WRITE, // Чтение и запись
             0,                           // Нет совместного доступа
             NULL,                        // Без атрибутов безопасности
@@ -37,6 +36,7 @@ int main()
             0,
             NULL)) == INVALID_HANDLE_VALUE)
         {
+            cout << GetLastError();
             throw SetPipeError("CreateFile: ", GetLastError());
         }
 
@@ -51,7 +51,6 @@ int main()
         for (int i = 1; i <= countOfMessages; i++)
         {
       
-
             if (!WriteFile(cH, buffer, strlen(buffer), &dwWrite, NULL))
             {
                 throw SetPipeError("WriteFile: ", GetLastError());
@@ -79,7 +78,6 @@ int main()
     return 0;
 }
 
-// Функции обработки ошибок (как у тебя)
 string GetErrorMsgText(int code)
 {
     switch (code)
