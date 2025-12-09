@@ -5,6 +5,7 @@ const path = require("path");
 const { parse } = require("querystring");
 const xml2js = require("xml2js");
 const xmlBuilder = require("xmlbuilder");
+const formidable = require('formidable');
 const mp = require("multiparty");
 
 function write405(response) {
@@ -187,7 +188,9 @@ function handleFormParameter(request, response) {
     });
 
     request.on("end", () => {
+
       let param = parse(body);
+      console.log(body);
       response.end(`<p>Text: ${param.inputText} </p>
                     <p>Number: ${param.inputNumber}</p>
                     <p>Date: ${param.inputDate}</p>
@@ -270,67 +273,116 @@ function handleFiles(request, response) {
   if (request.method !== "GET") {
     return write405(response);
   }
-  const parsedUrl = url.parse(request.url);
-  const parts = parsedUrl.pathname.split("/").filter((s) => s.trim().length !== 0);
 
-  if (parts.length !== 2) {
-    fs.readdir("./static", (err, files) => {
-      if (err) {
-        response.writeHead(500, { "Content-Type": "text/plain" });
-        response.end("Ошибка чтения директории");
-        return;
-      }
+  const files = fs.readdirSync('./static');
+  const n = files.length;
 
-      response.writeHead(200, {
-        "Content-Type": "text/plain",
-        "X-static-files-count": files.length,
-      });
+  response.setHeader('X-static-files-count', n);
+  response.end();
 
+};
 
-      response.end();
-    });
-  } else {
-    const filename = `./static/${parts[1]}`;
-    if (!fs.existsSync(filename)) {
-      response.writeHead(404);
-      response.end();
-    }
-
-    const file = fs.readFileSync(filename);
-    const ext = path.extname(filename);
-
-    response.setHeader('content-disposition', `attachment; filename="${filename}"`);
-    response.writeHead(200, { "Content-Type": MIME[ext] });
-    response.end(file);
+function handleFilesFilename(request, response) {
+  if (request.method !== "GET") {
+    return write405(response);
   }
+
+  const parsedUrl = url.parse(request.url, true);
+  const pathname = parsedUrl.pathname || '/';
+  const filename = decodeURIComponent(pathname.slice('/files/'.length));
+  const filepath = `./static/${filename}`;
+  if (!fs.existsSync(filepath)) {
+    response.writeHead(404);
+    response.end();
+  }
+
+  const file = fs.readFileSync(filepath);
+  const ext = path.extname(filepath);
+
+  response.setHeader('content-disposition', `attachment; filename="${filepath}"`);
+  response.writeHead(200, { "Content-Type": MIME[ext] });
+  response.end(file);
+
 }
+
+// function handleUpload(request, response) {
+//   if (request.method === "GET") {
+//     const file = fs.readFileSync("webform.html");
+//     write200Html(response, file);
+//   } else if (request.method === "POST") {
+//     let form = new mp.Form({ uploadDir: "./static" });
+
+//     form.on("file", (name, file) => {
+//       console.log(`filename: ${name} = ${file.originalFilename} in ${file.path}`);
+//     });
+
+//     form.on("error", (err) => {
+//       response.writeHead(500, { "Content-Type": "text/html; charset=utf-8" });
+//       response.end(`<p>form returned error: ${err}</p>`);
+//     });
+
+//     form.on("close", () => {
+//       write200Html(response, "<p>File uploaded</p>");
+//     });
+
+//     form.parse(request);
+
+//   } else {
+//     write405(response);
+//   }
+// }
 
 function handleUpload(request, response) {
   if (request.method === "GET") {
     const file = fs.readFileSync("webform.html");
     write200Html(response, file);
-  } else if (request.method === "POST") {
+    return;
+  }
+
+  if (request.method === "POST") {
     let form = new mp.Form({ uploadDir: "./static" });
 
-    form.on("file", (name, file) => {
-      console.log(`filename: ${name} = ${file.originalFilename} in ${file.path}`);
+    form.parse(request, (err, fields, files) => {
+      if (err) {
+        response.writeHead(400, { "content-type": "text/html;charset=utf-8" });
+        response.end("<h1>400 Bad Request</h1>");
+        return;
+      }
+
+      let uploaded_files = files.inpUpload;
+
+      if (!uploaded_files) {
+        response.writeHead(400, { "content-type": "text/html;charset=utf-8" });
+        response.end("<h1>400 Bad Request</h1>");
+        return;
+      }
+
+      if (!Array.isArray(uploaded_files)) {
+        uploaded_files = [uploaded_files];
+      }
+
+      uploaded_files.forEach(file => {
+        if (!file || !file.originalFilename) return;
+
+        let new_file_path = path.join("./static", file.originalFilename);
+
+        fs.rename(file.path, new_file_path, err => {
+          if (err) {
+            console.error(err);
+          }
+        });
+      });
+
+      response.writeHead(200, { "content-type": "text/html;charset=utf-8" });
+      response.end("<p>File uploaded</p>");
     });
 
-    form.on("error", (err) => {
-      response.writeHead(500, { "Content-Type": "text/html; charset=utf-8" });
-      response.end(`<p>form returned error: ${err}</p>`);
-    });
-
-    form.on("close", () => {
-      write200Html(response, "<p>File uploaded</p>");
-    });
-
-    form.parse(request);
-
-  } else {
-    write405(response);
+    return;
   }
+
+  write405(response);
 }
+
 
 const server = http.createServer((request, response) => {
   request.readableHighWaterMark = 1024;
@@ -355,9 +407,13 @@ const server = http.createServer((request, response) => {
     handleJson(request, response);
   } else if (parsedUrl.pathname.startsWith("/xml")) {
     handleXml(request, response);
+  }
+  else if (parsedUrl.pathname.startsWith("/files/")) {
+    handleFilesFilename(request, response);
   } else if (parsedUrl.pathname.startsWith("/files")) {
     handleFiles(request, response);
-  } else if (parsedUrl.pathname.startsWith("/upload")) {
+  }
+  else if (parsedUrl.pathname.startsWith("/upload")) {
     handleUpload(request, response);
   } else {
     write200Html(response, "<h3>Путь не поддерживается</h3>");

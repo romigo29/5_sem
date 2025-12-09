@@ -1,47 +1,44 @@
 // 09-07.js
 const http = require('http');
 const fs = require('fs');
-const path = require('path');
 
-const filePath = './static/pic.png';
-if (!fs.existsSync(filePath)) {
-    console.log(filePath);
-    process.exit(1);
-}
-
-const boundary = '----NodeMultipartBoundary' + Date.now();
-const stat = fs.statSync(filePath);
-const filename = path.basename(filePath);
-const pre = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: image/png\r\n\r\n`;
-const post = `\r\n--${boundary}--\r\n`;
-const preBuf = Buffer.from(pre, 'utf8');
-const postBuf = Buffer.from(post, 'utf8');
-const totalLength = preBuf.length + stat.size + postBuf.length;
+let bound = "----romigo29";
+let body = `--${bound}\r\n`;
+body += 'content-disposition:attachment; name="uploadFile"; filename="./MyFile.png"\r\n';
+body += 'content-type:application/octet-stream\r\n\r\n';
 
 const options = {
-    hostname: 'localhost',
-    port: 5000,
+    host: 'localhost',
     path: '/7',
+    port: 5000,
     method: 'POST',
     headers: {
-        'Content-Type': 'multipart/form-data; boundary=' + boundary,
-        'Content-Length': totalLength
+        'content-type': 'multipart/form-data; boundary=' + bound,
     }
-};
+}
 
-const req = http.request(options, res => {
-    console.log('status:', res.statusCode);
-    const bufs = [];
-    res.on('data', c => bufs.push(c));
-    res.on('end', () => console.log('body:', Buffer.concat(bufs).toString()));
+
+const request = http.request(options, (response) => {
+    console.log('Response status code: ', response.statusCode);
+    let responseBody = '';
+    response.on('data', (chunk) => {
+        responseBody += chunk;
+    });
+    response.on('end', () => {
+        console.log('Response body: ', responseBody);
+    });
 });
-req.on('error', console.error);
 
-req.write(preBuf);
-const rs = fs.createReadStream(filePath);
-rs.on('end', () => {
-    req.write(postBuf);
-    req.end();
+request.on('error', (err) => {
+    console.error('Error occured: ', err);
 });
-rs.pipe(req, { end: false });
+request.write(body);
 
+let stream = fs.ReadStream('./MyFile.png');
+
+stream.on('data', (chunk) => {
+    request.write(chunk);
+});
+stream.on('end', () => {
+    request.end(`\r\n--${bound}--\r\n`);
+});

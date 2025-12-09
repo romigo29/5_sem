@@ -11,17 +11,15 @@ const options = {
     method: 'GET'
 };
 
-const req = http.request(options, res => {
-    console.log('status:', res.statusCode);
-    if (res.statusCode !== 200) {
-        const bufs = [];
-        res.on('data', c => bufs.push(c));
-        res.on('end', () => console.log('body:', Buffer.concat(bufs).toString()));
-        return;
-    }
+const request = http.request(options, response => {
+    console.log('status:', response.statusCode);
     const ws = fs.createWriteStream(outPath);
-    res.pipe(ws);
+    response.pipe(ws);
     ws.on('finish', () => console.log('Saved to', outPath));
 });
-req.on('error', console.error);
-req.end();
+
+request.on('error', (err) => {
+    console.error('Error occured: ', err);
+});
+
+request.end();

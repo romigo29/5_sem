@@ -7,24 +7,24 @@ let options = {
     method: 'GET'
 }
 
-const req = http.request(options, (resp) => {
-    console.log("response status code: " + resp.statusCode);
-    console.log("response status message: " + resp.statusMessage);
-    console.log("remote address: " + resp.socket.remoteAddress);
-    console.log("remote port: " + resp.socket.remotePort);
+const request = http.request(options, (response) => {
+    console.log("response status code: " + response.statusCode);
+    console.log("response status message: " + response.statusMessage);
+    console.log("remote address: " + response.socket.remoteAddress);
+    console.log("remote port: " + response.socket.remotePort);
 
     let data = '';
 
-    resp.on('data', (chunk) => {
+    response.on('data', (chunk) => {
         data += chunk.toString('utf8');
     });
 
-    resp.on('end', () => {
+    response.on('end', () => {
         console.log(data);
     });
 });
 
-req.on('error', (e) => {
+request.on('error', (e) => {
     console.log("http request error: " + e.message);
 })
-req.end();
+request.end();
