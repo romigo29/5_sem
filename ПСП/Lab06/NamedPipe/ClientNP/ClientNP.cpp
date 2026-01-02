@@ -9,7 +9,7 @@ using namespace std;
 
 #define MAX_SIZE_OF_BUFFER 512
 #define PIPE_NAME L"\\\\.\\pipe\\Tube"
-#define PIPE_NAME_LAN L"\\\\Forced\\pipe\\Tube"
+#define PIPE_NAME_LAN L"\\\\kvasik\\pipe\\Tube"
 
 string GetErrorMsgText(int code);
 string SetPipeError(string msgText, int code);
@@ -28,7 +28,7 @@ int main()
 
         // CreateFile для подключения к серверу по сети
         if ((cH = CreateFileW(
-            PIPE_NAME,       // Имя канала
+            PIPE_NAME_LAN,       // Имя канала
             GENERIC_READ | GENERIC_WRITE, // Чтение и запись
             0,                           // Нет совместного доступа
             NULL,                        // Без атрибутов безопасности

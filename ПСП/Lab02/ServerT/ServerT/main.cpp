@@ -11,7 +11,7 @@
 
 using namespace std;
 
-string GetErrorMsgText(int code)+
+string GetErrorMsgText(int code)
 {
     string msgText;
     switch (code)

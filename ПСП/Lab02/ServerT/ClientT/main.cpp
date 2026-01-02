@@ -87,7 +87,7 @@ int main()
         memset(&serv, 0, sizeof(serv));
         serv.sin_family = AF_INET;
         serv.sin_port = htons(2000);
-        serv.sin_addr.s_addr = inet_addr("10.78.133.48");    
+        serv.sin_addr.s_addr = inet_addr("127.0.0.1");    
 
         if (connect(clientSock, (sockaddr*)&serv, sizeof(serv)) == SOCKET_ERROR) {
             int err = WSAGetLastError();
