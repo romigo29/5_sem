@@ -6,6 +6,8 @@ create table MyTable(
     b varchar(20)
 );
 
+select * from mytable;
+
 --2.	Заполните таблицу строками (10 шт.).
 begin
     for i in 1..10

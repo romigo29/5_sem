@@ -82,8 +82,8 @@ begin
         auditorium_capacity = 100,
         auditorium_type     = 'ЛК'
     where auditorium = '206-1';
-    --commit;
-    rollback;
+    commit;
+    --rollback;
 exception
     when others
         then dbms_output.put_line(sqlcode || ' ' || sqlerrm);
@@ -352,8 +352,8 @@ begin
         end loop;
 
     close curs_auditorium;
-    --commit;
-    rollback;
+    commit;
+    --rollback;
 exception
     when others then
         dbms_output.put_line(sqlerrm);
@@ -389,8 +389,8 @@ begin
         loop
             dbms_output.put_line(' ' || pp.auditorium || ' ' || pp.auditorium_capacity);
         end loop;
-    --commit;
-    rollback;
+    commit;
+    --rollback;
 exception
     when others then
         dbms_output.put_line(sqlerrm);
@@ -422,8 +422,8 @@ begin
         loop
             dbms_output.put_line(rec.auditorium || ' ' || rec.auditorium_capacity);
         end loop;
-    --commit;
-    rollback;
+    commit;
+    --rollback;
 end;
 
 

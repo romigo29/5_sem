@@ -187,12 +187,22 @@ END;
 -- task26 for
 
 DECLARE
-  v_num NUMBER := 1;
 BEGIN
-  FOR i IN 1..10 LOOP
-    DBMS_OUTPUT.PUT_LINE(i);
+  FOR i IN 1..5 LOOP
+    DBMS_OUTPUT.PUT_LINE( i * 2 - 1);
   END LOOP;
 END;
+
+DECLARE
+  v_num NUMBER := 1;
+BEGIN
+  WHILE v_num <= 10 LOOP
+    DBMS_OUTPUT.PUT_LINE(v_num);
+    v_num := v_num + 1;
+  END LOOP;
+END;
+
+
 
 
 

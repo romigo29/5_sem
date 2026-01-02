@@ -1,11 +1,12 @@
 --task1 sqlnet.ora , tnsnames.ora
 -- C:\app\WINBLUE_VM\product\12.2.0\dbhome_1\network\admin
 
---task2 sqlplus
+--task2 Cоединитесь при помощи sqlplus с Oracle как пользователь SYSTEM, получите перечень параметров экземпляра Oracle.
+
 --sqlplus system/<password> as sysdba
 --SHOW PARAMETER
 
---task3 PDB получите список табличных пространств, файлов табличных пространств, ролей и пользователей.
+--task3 Соединитесь при помощи sqlplus с подключаемой базой данных как пользователь SYSTEM, получите список табличных пространств, файлов табличных пространств, ролей и пользователей.
 ALTER SESSION SET CONTAINER = ORCLPDB;
 SHOW CON_NAME;
 --alter database open (if pdb is not opened)
@@ -18,9 +19,9 @@ select username from dba_users;
 --task4 Ознакомьтесь с параметрами в HKEY_LOCAL_MACHINE/SOFTWARE/ORACLE 
 --WIN + R > regedit
 
-
 --task5 Запустите утилиту Oracle Net Manager и подготовьте строку подключения с именем имя_вашего_пользователя_SID, где SID – идентификатор подключаемой базы данных. 
 --task6 Подключитесь с помощью sqlplus под собственным пользователем и с применением подготовленной строки подключения. 
+sqlplus RIVCORE/<password>@RIV_ORCL
 --task7 Выполните select к любой таблице, которой владеет ваш пользователь. 
 select * from x;
 --task8 Ознакомьтесь с командой HELP.Получите справку по команде TIMING. Подсчитайте, сколько времени длится select к любой таблице.

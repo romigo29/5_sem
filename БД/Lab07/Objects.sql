@@ -1,3 +1,9 @@
+create tablespace TS_RIVCORE
+datafile 'C:\app\Tablespaces\TS_RIVCORE.dbf'
+size 7M
+autoextend on next 5M
+maxsize 100M;
+
 --task2
 create sequence s1 start with 1000
     increment by 10
@@ -10,7 +16,6 @@ create sequence s1 start with 1000
 select s1.nextval from dual;
 select s1.currval from dual;
     
-drop sequence s1;
 --task3
 create sequence s2 start with 10
     increment by 10
@@ -58,8 +63,15 @@ create table T1 (
     n2 number(20),
     n3 number(20),
     n4 number(20)
-    ) cache storage (buffer_pool keep) tablespace TS_RIV;
+    ) cache storage (buffer_pool keep) tablespace TS_RIVCORE;
 
+select * from user_tablespaces;
+select * from T1;
+
+drop sequence s1;
+drop sequence s2;
+drop sequence s3;
+drop sequence s4;
 
 begin
     for i in 1..7 loop
@@ -71,12 +83,16 @@ select * from T1;
 
 
 --task9
+drop table A;
+drop table B;
+drop table C;
+drop cluster ABC;
+
 create cluster ABC (
     X number(10),
     V varchar2(12)
 ) size 200 hashkeys 200
   
-drop cluster ABC;
   
 --task10
 create table A(
@@ -107,8 +123,6 @@ select cluster_name from user_clusters;
 
 --task14
 
-SELECT * FROM all_tables where table_name = 'C'
-
 create synonym C1 for RIVCORE.C;
 insert into C1 values(1, 'va', 'ya');
 select * from C1;
@@ -121,24 +135,25 @@ insert into B1 values(1, 'va', 'ya');
 select * from B1;
 
 alter session set container = orclpdb;
-
+drop public synonym B1;
 --task16
 create table A16(
     XA number(10),
     VA varchar2(12),
     YA number(10),
     CONSTRAINT PK_A16 PRIMARY KEY(XA)
-) 
+);
 
 create table B16(
     XB number(10),
     VB varchar2(12),
     YB number(10),
     CONSTRAINT FK_B16 FOREIGN KEY (YB) references A16(XA)
-) 
+); 
 
 insert into A16 values (1, 'a', 1);
 insert into B16 values(1, 'b', 1);
+commit; 
 
 create view V1 
 as select * from A16
@@ -148,34 +163,25 @@ on A16.XA = B16.YB;
 select * from V1;
 
 --task17
+
 CREATE MATERIALIZED VIEW MV
 REFRESH COMPLETE
-START WITH SYSDATE
-NEXT SYSDATE + 1/1440
+NEXT SYSDATE + numtodsinterval(10, 'second')
 AS
-SELECT * 
+SELECT *
 FROM A16
-INNER JOIN B16 
-ON A16.XA = B16.YB;
-
+JOIN B16 ON A16.XA = B16.YB;
 
 select * from MV;
+select * from A16 inner join B16 on A16.XA = B16.YB;
 
-SELECT *
-FROM USER_MVIEWS
-WHERE MVIEW_NAME = 'MV';
-
-insert into A16 values (3, 'a', 3);
-insert into B16 values (3, 'b', 3);
+insert into A16 values (2, 'a', 2);
+insert into B16 values (2, 'b', 2);
 commit;
-
-SELECT LAST_REFRESH_DATE FROM USER_MVIEWS
-EXEC DBMS_MVIEW.REFRESH('MV');
 
 drop view V1;
 drop materialized view MV;
 drop table B16;
 drop table A16;
 
-
-    
+EXEC DBMS_MVIEW.REFRESH('MV');

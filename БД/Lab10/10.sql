@@ -380,6 +380,7 @@ select * from TEACHERS_NEXT_MONTH;
 -- 5. Создайте представление, в котором поместите количество преподавателей, 
 -- которые родились в каждом месяце.
 drop table MONTHS;
+drop view TEACHER_COUNT_BY_MONTH;
 
 create table MONTHS
 (
@@ -419,8 +420,6 @@ select month_name,
 from MONTHS;
 
 select * from TEACHER_COUNT_BY_MONTH;
-select SUM(COUNT) from TEACHER_COUNT_BY_MONTH;
-select COUNT(*) from TEACHER;
 
 -- 6. Создать курсор и вывести список преподавателей, у которых в следующем году юбилей.
 declare

@@ -64,7 +64,7 @@ CREATE OR REPLACE PACKAGE BODY schedule_manager IS
     BEGIN
         SELECT COUNT(*)
         INTO v_cnt
-        FROM USER_SCHEDULER_RUNNING_JOBS
+        FROM USER_SCHEDULER_JOBS
         WHERE job_name = g_job_name;
 
         IF v_cnt > 0 THEN
@@ -77,6 +77,7 @@ CREATE OR REPLACE PACKAGE BODY schedule_manager IS
 END schedule_manager;
 /
 
+select * from user_scheduler_jobs;
 
 BEGIN schedule_manager.create_job; END;
 /
@@ -84,14 +85,25 @@ BEGIN schedule_manager.create_job; END;
 BEGIN schedule_manager.run_now; END;
 /
 
+BEGIN schedule_manager.run_job; END;
+/
+
 SELECT schedule_manager.is_running FROM dual;
 
-SELECT * FROM JOB_LOG ORDER BY run_date DESC;
+
 
 BEGIN schedule_manager.remove_job; END;
 /
 
+SELECT * FROM JOB_LOG;
+SELECT * FROM SOURCE_TABLE;
+SELECT * FROM ARCHIVE_TABLE;
+
+SELECT * FROM JOB_LOG ORDER BY run_date DESC;
+
 SELECT COUNT(*) AS running_jobs
 FROM USER_SCHEDULER_RUNNING_JOBS;
+
+
 
 
