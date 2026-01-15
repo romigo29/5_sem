@@ -9,7 +9,7 @@
 
 using namespace std;
 
-// Получаем идентификатор потока (аналог GetCurrentThreadId)
+// РџРѕР»СѓС‡Р°РµРј РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕС‚РѕРєР° (Р°РЅР°Р»РѕРі GetCurrentThreadId)
 pid_t get_tid() {
     return static_cast<pid_t>(syscall(SYS_gettid));
 }
@@ -20,32 +20,32 @@ int main() {
     pid_t processId = getpid();
     pid_t threadId = get_tid();
 
-    // Получаем класс приоритета (политику планирования)
+    // РџРѕР»СѓС‡Р°РµРј РєР»Р°СЃСЃ РїСЂРёРѕСЂРёС‚РµС‚Р° (РїРѕР»РёС‚РёРєСѓ РїР»Р°РЅРёСЂРѕРІР°РЅРёСЏ)
     int policy = sched_getscheduler(0);
     if (policy == -1) {
-        perror("Ошибка получения политики планирования");
+        perror("РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїРѕР»РёС‚РёРєРё РїР»Р°РЅРёСЂРѕРІР°РЅРёСЏ");
         return 1;
     }
 
-    // Получаем приоритет потока
+    // РџРѕР»СѓС‡Р°РµРј РїСЂРёРѕСЂРёС‚РµС‚ РїРѕС‚РѕРєР°
     sched_param param{};
     if (sched_getparam(0, &param) == -1) {
-        perror("Ошибка получения приоритета потока");
+        perror("РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РїСЂРёРѕСЂРёС‚РµС‚Р° РїРѕС‚РѕРєР°");
         return 1;
     }
 
-    // Получаем маску родственности процессоров
+    // РџРѕР»СѓС‡Р°РµРј РјР°СЃРєСѓ СЂРѕРґСЃС‚РІРµРЅРЅРѕСЃС‚Рё РїСЂРѕС†РµСЃСЃРѕСЂРѕРІ
     cpu_set_t processMask;
     CPU_ZERO(&processMask);
     if (sched_getaffinity(0, sizeof(processMask), &processMask) == -1) {
-        perror("Ошибка получения маски родственности");
+        perror("РћС€РёР±РєР° РїРѕР»СѓС‡РµРЅРёСЏ РјР°СЃРєРё СЂРѕРґСЃС‚РІРµРЅРЅРѕСЃС‚Рё");
         return 1;
     }
 
-    // Подсчитываем количество доступных процессоров
+    // РџРѕРґСЃС‡РёС‚С‹РІР°РµРј РєРѕР»РёС‡РµСЃС‚РІРѕ РґРѕСЃС‚СѓРїРЅС‹С… РїСЂРѕС†РµСЃСЃРѕСЂРѕРІ
     int availableProcessors = CPU_COUNT(&processMask);
 
-    // Преобразуем маску в двоичный вид
+    // РџСЂРµРѕР±СЂР°Р·СѓРµРј РјР°СЃРєСѓ РІ РґРІРѕРёС‡РЅС‹Р№ РІРёРґ
     bitset<64> processAffinityMask;
     long totalCPUs = sysconf(_SC_NPROCESSORS_CONF);
     for (int i = 0; i < totalCPUs; ++i) {
@@ -53,13 +53,13 @@ int main() {
             processAffinityMask.set(i);
     }
 
-    // Определяем текущий процессор
+    // РћРїСЂРµРґРµР»СЏРµРј С‚РµРєСѓС‰РёР№ РїСЂРѕС†РµСЃСЃРѕСЂ
     int currentProcessor = sched_getcpu();
 
-    // Уровень любезности (nice)
+    // РЈСЂРѕРІРµРЅСЊ Р»СЋР±РµР·РЅРѕСЃС‚Рё (nice)
     int niceValue = getpriority(PRIO_PROCESS, 0);
 
-    // === Вывод информации ===
+    // === Р’С‹РІРѕРґ РёРЅС„РѕСЂРјР°С†РёРё ===
     cout << "Process ID: " << processId << endl;
     cout << "Thread ID: " << threadId << endl;
 
@@ -80,3 +80,4 @@ int main() {
 
     return 0;
 }
+

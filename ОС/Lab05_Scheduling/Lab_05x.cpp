@@ -11,14 +11,14 @@
 
 using namespace std;
 
-// Получение идентификатора потока (TID)
+// РџРѕР»СѓС‡РµРЅРёРµ РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂР° РїРѕС‚РѕРєР° (TID)
 pid_t get_tid() {
     return static_cast<pid_t>(syscall(SYS_gettid));
 }
 
 int main() {
-    pid_t pid = getpid();       // идентификатор процесса
-    pid_t tid = get_tid();      // идентификатор потока
+    pid_t pid = getpid();       // РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїСЂРѕС†РµСЃСЃР°
+    pid_t tid = get_tid();      // РёРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРѕС‚РѕРєР°
 
     auto start_time = chrono::high_resolution_clock::now();
 
@@ -29,10 +29,10 @@ int main() {
     for (int i = 1; i <= 1'000'000; ++i) {
 
         if (i % 1000 == 0) {
-            // Определяем текущий CPU, на котором выполняется поток
+            // РћРїСЂРµРґРµР»СЏРµРј С‚РµРєСѓС‰РёР№ CPU, РЅР° РєРѕС‚РѕСЂРѕРј РІС‹РїРѕР»РЅСЏРµС‚СЃСЏ РїРѕС‚РѕРє
             int cpu = sched_getcpu();
 
-            // Уровень любезности (nice)
+            // РЈСЂРѕРІРµРЅСЊ Р»СЋР±РµР·РЅРѕСЃС‚Рё (nice)
             int nice_val = getpriority(PRIO_PROCESS, 0);
 
             cout << "Iteration: " << i
@@ -54,3 +54,4 @@ int main() {
 
     return 0;
 }
+
